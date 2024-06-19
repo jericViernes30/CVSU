@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('POS_number');
             $table->integer('starting_cash');
             $table->integer('closing_cash');
+            $table->integer('cash_in')->nullable();
+            $table->integer('cash_out')->nullable();
             $table->timestamps();
         });
     }
