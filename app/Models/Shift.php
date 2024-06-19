@@ -14,6 +14,8 @@ class Shift extends Model
         'cashier',
         'POS_number',
         'starting_cash',
-        'closing_cash'
+        'closing_cash',
+        'cash_in',
+        'cash_out'
     ];
 }
