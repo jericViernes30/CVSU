@@ -8,10 +8,13 @@ export default {
   theme: {
     extend: {
       colors:{
-        "main" : "#EE7823",
+        "main" : "#df1018",
         "bd" : "#737373",
         "proceed": "#18D742"
-      }
+      },
+      blur: {
+        '5px': '5px',
+      },
     },
   },
   plugins: [],
