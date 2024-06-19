@@ -9,20 +9,22 @@
     @vite('resources/css/app.css')
     <title>Dashboard</title>
 </head>
-<body class="w-full h-screen bg-[#fefefe]">
+<body class="w-full h-screen bg-[#ffd962]">
     <div class="w-2/4 mx-auto hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50" id="scanner">
         <video class="mx-auto" id="preview" width="1%"></video><br>
     </div>
     {{-- Top bar --}}
     <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
         <div class="w-1/6">
-            <p class="text-lg font-semibold">MAMITA'S</p>
+            <div class="">
+                <img src="{{asset('images/logo2.png')}}" alt="" class="w-1/2">
+            </div>
         </div>
     </div>
     {{-- main --}}
     <div class="w-full flex h-[92%]">
         {{-- navigations --}}
-        <div class="w-[5%] border-r border-bd py-6">
+        <div class="w-[5%] py-6">
             <div class="flex w-full flex-col items-center justify-center mb-8">
                 <img src="{{asset('images/home-hover.png')}}" alt="Home Icon" class="w-1/3">
                 <p class="text-xs text-main">Home</p>
@@ -37,9 +39,9 @@
             </div>
         </div>
         {{-- POS --}}
-        <div class="w-[95%] flex py-10">
+        <div class="w-[95%] flex py-10 bg-[#e5e5e5]">
             <div class="w-full grid grid-cols-3 grid-rows-3">
-                <div class="w-10/12 grid grid-cols-5 grid-rows-5 row-start-2 col-start-2 shadow-2xl">
+                <div class="w-10/12 grid grid-cols-5 grid-rows-5 row-start-2 col-start-2 shadow-2xl bg-[#f2f2f2]">
                     <p class="row-start-2 col-start-2 col-span-3 text-center">Starting money</p>
                     <form action="{{route('start_shift')}}" method="POST" class="w-full row-start-3 col-start-2 col-span-3">
                         @csrf
