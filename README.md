@@ -64,3 +64,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## About the Developer
+
+His name is Jeric James C. Viernes, a 3rd year BSIT Student from St. Vincent College of Cabuyao.
