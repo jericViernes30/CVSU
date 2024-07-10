@@ -3,190 +3,327 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/3.3.3/adapter.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
-    <script type="text/javascript" src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+    <script src="{{ asset('jquery/jquery.js') }}"></script>
+    <script src="{{asset('html2canvas.min.js')}}"></script>
+    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
     @vite('resources/css/app.css')
     <title>Dashboard</title>
+    <style>
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            #receipt, #receipt * {
+                visibility: visible;
+            }
+            @page {
+            size: 80mm auto; /* Let the height adjust automatically */
+            margin: 0; /* Optional: Adjust margins if needed */
+        }
+        }
+        #receipt{
+            font-family: 'Courier New', monospace;
+        }
+    </style>
 </head>
-<body class="w-full h-screen bg-[#ffd962]">
-    <div class="w-2/4 mx-auto hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50" id="scanner">
-        <video class="mx-auto" id="preview" width="1%"></video><br>
+<body class="w-full h-screen">
+    <div id="receipt" class="invisible w-[80mm] px-5 py-5 bg-white absolute top-0 left-1/2 transform -translate-x-1/2">
+        <img src="{{asset('images/receipt-logo.png')}}" alt="" class="block mx-auto pt-3 pb-8 w-[70%]">
+        <p class="text-center text-lg font-semibold">MAMATID</p>
+        <p class="text-center">MAMITA'S MAMATID #31 JP RIZAL ST.</p>
+        <p class="text-center mb-7">MAMATID, CABUYAO CITY LAGUNA PHILIPPINES</p>
+        <div class="w-full">
+            <p class="text-xs font-medium mb-2">{{ $time }}</p>
+            @php
+                // Define an array of food prices, where the key is the food name and the value is the price
+                $foodPrices = $prices;
+                $pay = 0;
+                $total = 0;
+                $subTotal = 0; // Initialize $subTotal
+                $tax = 0;
+            @endphp
+            @foreach ($foods as $food)
+            @php
+                // Get the price from the $foodPrices array based on the food name
+                $price = $foodPrices[$food->food_name] ?? 0; // Default to 0 if the price is not found
+                $total = $price * $food->count;
+                $pay += $total;
+                $subTotal += $total; // Accumulate the subtotal
+            @endphp
+                <div class="w-full flex gap-2 text-xs mb-2">
+                    <p class="w-[10%]">{{ $food->count }}</p>
+                    <p class="w-[40%]">{{ $food->food_name }}</p>
+                    <p class="w-1/4">@ &#8369;{{ $price = $foodPrices[$food->food_name] ?? 0; }}.00</p>
+                    <p class="w-1/4 text-right">&#8369; {{$total}}.00</p>
+                </div>
+            @endforeach
+            @php
+                $tax = $subTotal * 0.12; // Calculate tax based on subtotal
+                $totalDue = $subTotal - $tax; // Total due includes tax
+            @endphp
+            <div class="w-full flex justify-between mb-1">
+                <p class="text-md">TOTAL DUE</p>
+                <p class="text-xl font-semibold">PHP {{$pay}}.00</p>
+            </div>
+            <div class="w-full flex justify-between mb-1 text-sm">
+                <p>VATable Sales</p>
+                <p>{{$totalDue}}</p>
+            </div>
+            <div class="w-full flex justify-between mb-1 text-sm">
+                <p>VAT Amount</p>
+                <p>{{$tax}}</p>
+            </div>
+            <div class="w-full flex justify-between mb-1 text-sm">
+                <p>Zero-Rated Sales</p>
+                <p>0.00</p>
+            </div>
+            <div class="w-full flex justify-between mb-1 text-sm">
+                <p>VAT-Exempt Sales</p>
+                <p>0.00</p>
+            </div>
+            <p class="text-xs">Cust Name:_______________________</p>
+            <p class="text-xs">Address:_________________________</p>
+        </div>
     </div>
     {{-- Top bar --}}
-    <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
+    {{-- <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
         <div class="w-1/6">
             <div class="">
                 <img src="{{asset('images/logo2.png')}}" alt="" class="w-1/2">
             </div>
         </div>
-    </div>
+    </div> --}}
     {{-- main --}}
-    <div class="w-full flex h-[92%]">
+    <div class="w-full flex h-full">
         {{-- navigations --}}
-        <div class="w-[5%] py-6">
-            <div class="flex w-full flex-col items-center justify-center py-4 bg-[#f2f2f2]">
-                <img src="{{asset('images/home.png')}}" alt="Home Icon" class="w-1/3">
-                <p class="text-xs text-black">Home</p>
+        <div class="w-[6%] py-6 bg-white relative">
+            <div class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 mb-3">
+                <img src="{{asset('images/logo-transparent.png')}}" alt="">
             </div>
-            <a href="{{route('cashier')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/cashier.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Cashier</p>
-            </a>
-            <a href="{{route('history')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/history.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">History</p>
-            </a>
-            <a href="{{route('office.login')}}" target="__blank" class="flex w-full flex-col items-center justify-center">
-                <img src="{{asset('images/ranking.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Back Office</p>
-            </a>
+            <div href="{{route('dashboard')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/products-new.png')}}" alt="Home Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Home</p>
+            </div>
+            <div href="{{route('cashier')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 rounded-xl bg-[#f5a7a4]">
+                <img src="{{asset('images/cashier-red.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#e5231a]">Cashier</p>
+            </div>
+            <div href="{{route('history')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/history-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">History</p>
+            </div>
+            <div href="{{route('inventory')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/inv-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Inventory</p>
+            </div>
+            <div href="{{route('orders')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/order-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Orders</p>
+            </div>
+            <div href="{{route('office.login')}}" target="__blank" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/backoffice-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Office</p>
+            </div>
         </div>
         {{-- POS --}}
-        <div class="w-[95%] flex py-10 bg-[#f2f2f2]">
-            <div class="w-2/3 block mx-auto shadow-2xl rounded-bl-md rounded-br-md overflow-hidden">
-                <div class="w-full py-1 bg-main rounded-tl-full rounded-tr-full">
-                    <span class="text-main">.</span>
-                </div>
-                <div class="w-full h-full flex bg-white">
-                    <div class="w-1/2 flex flex-col items-center h-full bg-[#f8f8f8] border-r border-bd">
-                        <div class="w-3/4 block mx-auto p-2 border-r border-b border-l border-bd mb-8">
-                            <div class="w-full flex items-center justify-between">
-                                <p class="font-semibold">#1-{{$ticket}}</p>
-                                <p class="font-semibold">{{$customer}}</p>
-                            </div>
+        <div class="w-[95%] p-4 bg-[#f2f2f2]">
+            <div class="w-full h-fit bg-white rounded-xl py-3 px-5 mb-6">
+                <p class="text-lg font-medium">Order <span class="text-main">#1-{{$ticket}}</span></p>
+                <p class="text-sm text-[#565857]">{{ $time }}</p>
+            </div>
+            <div class="w-full flex gap-6 h-fit">
+                <div class="w-[60%]">
+                    <div class="w-full py-3 px-5 mb-3 bg-white rounded-xl">
+                        <div class="w-full border-b pb-3">
+                            <p class="font-semibold">Ordered Items</p>
                         </div>
-                        <div class="w-full flex flex-col items-center h-1/2 overflow-y-scroll border-b border-bd">
-                            @php
-                            // Define an array of food prices, where the key is the food name and the value is the price
-                            $foodPrices = $prices;
-                            $pay = 0;
-                            $total = 0;
-                            $tax = 0;
-                            @endphp
-                            <div class="w-3/4 flex items-center font-medium">
-                                <p id="count" class="w-[10%]">Qty</p>
-                                <p class="food w-[80%]">Item</p>
-                                <p id="food-total" class="w-[10%]">Total</p>
-                            </div>
-                            @foreach ($foods as $food)
+                        <div class="w-full border-b h-[220px]">
+                            <div class="py-3">
                                 @php
-                                    // Get the price from the $foodPrices array based on the food name
-                                    $price = $foodPrices[$food->food_name] ?? 0; // Default to 0 if the price is not found
-                                    $total = $price * $food->count;
-                                    $pay += $total;
-                                    $tax = $pay * 0.12;
+                                // Define an array of food prices, where the key is the food name and the value is the price
+                                $foodPrices = $prices;
+                                $pay = 0;
+                                $total = 0;
+                                $tax = 0;
                                 @endphp
-                                <div class="w-3/4 flex items-center border-b border-bd py-2">
-                                    <p id="count" class="w-[10%]">{{$food->count}}</p>
-                                    <p class="food w-[70%]">{{$food->food_name}}</p>
-                                    <p id="food-total text-right" class="w-[20%]">&#8369; {{$total}}.00</p>
-                                </div>
-                            @endforeach
-                            @php
-                                $subTotal = $pay - $tax;
-                            @endphp
-                            <script>
-                                console.log({{$price}});
-                                console.log({{$total}});
-                                console.log({{$pay}});
-                                console.log({{$subTotal}});
-                            </script>
+                                @foreach ($foods as $food)
+                                    @php
+                                        // Get the price from the $foodPrices array based on the food name
+                                        $price = $foodPrices[$food->food_name] ?? 0; // Default to 0 if the price is not found
+                                        $total = $price * $food->count;
+                                        $pay += $total;
+                                        $tax = $pay * 0.12;
+                                        $subTotal = $pay - $tax;
+                                    @endphp
+                                    <div class="w-full flex">
+                                        <div class="w-[58%]">
+                                            <p>{{ $food->food_name }}</p>
+                                        </div>
+                                        <div class="w-[15.33%]">
+                                            <p>per pc</p>
+                                        </div>
+                                        <div class="w-[13.33%] text-right">
+                                            <p>&#8369;{{ $price = $foodPrices[$food->food_name] ?? 0; }}.00 x {{ $food->count }}</p>
+                                        </div>
+                                        <div class="w-[13.33%] text-right">
+                                            <p>&#8369; {{$total}}.00</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                        <div class="w-full flex flex-col gap-4 items-center py-6">
-                            <div class="w-3/4 flex justify-between">
-                                <p>Sub-total</p>
-                                <p>&#8369; {{$subTotal}}0</p>
+                        <div class="flex justify-end">
+                            <div class="w-[30%] p-3">
+                                <div class="w-full flex justify-between">
+                                    <p>Subtotal</p>
+                                    <p>&#8369; {{$subTotal}}</p>
+                                </div>
+                                <div class="w-full flex justify-between">
+                                    <p>Tax</p>
+                                    <p>&#8369; {{$tax}}</p>
+                                </div>
+                                <div class="w-full flex justify-between">
+                                    <p class="text-lg font-medium">Total</p>
+                                    <p class="text-lg font-medium">&#8369; {{$pay}}.00</p>
+                                </div>
                             </div>
-                            <div class="w-3/4 flex justify-between">
-                                <p>Tax (12%)</p>
-                                <p>&#8369; {{$tax}}0</p>
-                            </div>
-                            <div class="w-3/4 flex justify-between">
-                                <p class="text-lg font-semibold">Total</p>
-                                <p class="text-lg font-semibold">&#8369; {{$pay}}.00</p>
-                            </div>
-                            <div class="w-3/4 flex justify-between"></div>
                         </div>
                     </div>
-                    
-                    <div class="w-1/2 bg-white">
-                        <div class="w-10/12 block mx-auto p-4">
-                            <p class="mt-24 text-center mb-5">Enter cash here</p>
-                            <form action="{{route('sale')}}" method="POST">
-                                @csrf
-                                <div class="w-full flex item border border-bd px-2 relative rounded-xl mb-3">
-                                    <div class="w-[20%] flex items-center justify-center absolute top-1/2 transform -translate-y-1/2 left-4">
-                                        <img src="{{asset('images/money.png')}}" alt="" class="w-[40%] object-cover">
-                                    </div>
-                                    <div class="w-full flex justify-end items-center">
-                                        <p class="text-xl">&#8369;</p>
-                                        <input id="cash" type="number" name="cash" class="px-1 py-2 outline-none text-xl appearance-none bg-none">
-                                    </div>
-                                </div>
-                                <input type="hidden" name="sub_total" value="{{$subTotal}}">
-                                <input type="hidden" name="tax" value="{{$tax}}">
-                                <input type="hidden" name="pay" value="{{$pay}}">
-                                <input type="hidden" name="ticket" value="{{$ticket}}">
-                                <input type="hidden" name="customer" value="{{$customer}}">
-                                <button id="submit" type="submit" class="w-full py-2 rounded-xl text-lg text-white mb-10" disabled>Cash</button>
-                                <script>
-                                    $(document).ready(function(){
-                                        var submit = document.getElementById('submit');
-                                        var total = {{$pay}};
-                                        if(submit.disabled === true){
-                                            submit.classList.remove('bg-proceed')
-                                            submit.classList.add('bg-gray-500')
-                                        }
-                                        $('#cash').keyup(function(){
-                                            var cash = $(this).val()
-
-                                            if (cash === '') { // Check if cash input is empty
-                                                submit.disabled = true; // Disable submit button
-                                                submit.classList.remove('bg-main');
-                                                submit.classList.add('bg-gray-500');
-                                                return; // Exit function early if cash input is empty
-                                            }
-
-                                            var cashVal = parseInt(cash)
-                                            if (isNaN(cashVal)) {
-                                                console.log("Please enter a valid number.");
-                                            } else if (cashVal < total) {
-                                                console.log("The entered cash is less than the total.");
-                                                submit.classList.remove('bg-main')
-                                                submit.classList.add('bg-gray-500')
-                                                submit.disabled = true
-                                            } else {
-                                                console.log("The entered cash is greater than or equal to the total.");
-                                                submit.disabled = false
-                                                submit.classList.remove('bg-gray-500')
-                                                submit.classList.add('bg-main')
-                                            }
-                                        })
-                                    })
-                                </script>
-
-                                <p class="mt-10 text-center mb-5">Quick cash payment</p>
-                                <div class="w-full flex gap-3">
-                                    <button onclick="setAmount(20)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 20.00</button>
-                                    <button onclick="setAmount(50)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 50.00</button>
-                                    <button onclick="setAmount(100)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 100.00</button>
-                                    <button onclick="setAmount(200)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 200.00</button>
-                                </div>
-                            </form>
+                    <div class="bg-white py-3 px-5 rounded-xl">
+                        <div class="w-full border-b pb-3">
+                            <p class="font-semibold">Customer Details</p>
+                        </div>
+                        <div class="w-full py-2">
+                            <div class="w-full flex py-1">
+                                <p class="w-1/2">{{ $customer }}</p>
+                                <p class="w-1/2">Philippines</p>
+                            </div>
+                            <div class="w-full flex py-1">
+                                <p class="w-1/2">Not available </p>
+                                <p class="w-1/2">Not available </p>
+                            </div>
+                            <div class="w-full flex py-1">
+                                <p class="w-1/2">Not available </p>
+                                <p class="w-1/2">Not available </p>
+                            </div>
+                            <div class="w-full flex py-1">
+                                <p class="w-1/2">Cash</p>
+                                <p class="w-1/2">Not available</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>  
+                <div class="w-[40%] bg-white rounded-xl px-5 py-4">
+                    <form action="{{route('sale')}}" method="POST">
+                        @csrf
+                        <div class="w-full py-6 flex items-center justify-center bg-[#3c463f] mb-4 rounded-lg">
+                            <input id="cash" type="text" name="cash" class="bg-[#3c463f] w-full text-5xl text-center text-white outline-none appearance-none bg-none">
+                        </div>
+                        <div class="w-full h-[250px] grid grid-cols-3 grid-rows-4 gap-2 mb-9">
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="1">1</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="2">2</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="3">3</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="4">4</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="5">5</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="6">6</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="7">7</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="8">8</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="9">9</button>
+                            <button type="button" class="rounded-md border-2 shadow-md col-span-2 calc-btn" data-val="0">0</button>
+                            <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="del">DEL</button>
+                        </div>
+                        <input type="hidden" name="sub_total" value="{{$subTotal}}">
+                        <input type="hidden" name="tax" value="{{$tax}}">
+                        <input type="hidden" name="pay" value="{{$pay}}">
+                        <input type="hidden" name="ticket" value="{{$ticket}}">
+                        <input type="hidden" name="customer" value="{{$customer}}">
+                        <button id="submit" type="submit" class="w-full py-2 rounded-xl text-lg text-white mb-4" disabled>Pay</button>
+                        <script>
+                            $(document).ready(function() {
+                                var submit = document.getElementById('submit');
+                                submit.addEventListener('click', function() {
+                                    html2canvas(document.getElementById('contentToSave'), {
+                                        scale: 2 // Increase scale for better quality
+                                    }).then(function(canvas) {
+                                        var link = document.createElement('a');
+                                        link.href = canvas.toDataURL('image/jpeg');
+                                        link.download = 'receipt.jpg';
+                                        link.click();
+                                    });
+                                });
+                                var total = {{ $pay }}; // Example total value, replace with actual total
+                                
+                                if(submit.disabled === true){
+                                    submit.classList.remove('bg-proceed');
+                                    submit.classList.add('bg-gray-500');
+                                }
+                    
+                                document.querySelectorAll('.calc-btn').forEach(button => {
+                                    button.addEventListener('click', () => {
+                                        const value = button.getAttribute('data-val');
+                                        var cash_disp = document.getElementById('cash');
+                    
+                                        if (value === "del") {
+                                            // Remove the last character from the input value
+                                            cash_disp.value = cash_disp.value.slice(0, -1);
+                                        } else {
+                                            // Concatenate the new value to the existing value of the input element
+                                            cash_disp.value += value;
+                                        }
+                    
+                                        // Get the current value of the input field
+                                        var cash = cash_disp.value;
+                                        console.log(cash);
+                    
+                                        if (cash === '') { // Check if cash input is empty
+                                            submit.disabled = true; // Disable submit button
+                                            submit.classList.remove('bg-main');
+                                            submit.classList.add('bg-gray-500');
+                                            return; // Exit function early if cash input is empty
+                                        }
+                    
+                                        var cashVal = parseInt(cash);
+                                        if (isNaN(cashVal)) {
+                                            console.log("Please enter a valid number.");
+                                        } else if (cashVal < total) {
+                                            console.log("The entered cash is less than the total.");
+                                            submit.classList.remove('bg-main');
+                                            submit.classList.add('bg-gray-500');
+                                            submit.disabled = true;
+                                        } else {
+                                            console.log("The entered cash is greater than or equal to the total.");
+                                            submit.disabled = false;
+                                            submit.classList.remove('bg-gray-500');
+                                            submit.classList.add('bg-main');
+                                        }
+                                    });
+                                });
+                            });
+                        </script>
+                        <div class="w-full flex gap-3">
+                            <button type="button" onclick="printReceipt()" class="w-full bg-[#3d3d3d] text-white py-2 rounded-lg">Print receipt</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     <script>
-        function setAmount(amount){
+        function printReceipt(){
             event.preventDefault(); // Prevent default form submission
-            var cash = document.getElementById('cash');
-            cash.value = amount;
-            $('#cash').keyup(); // Trigger keyup event to check if it exceeds total
+            $('#receipt').removeClass('invisible')
+            html2canvas(document.getElementById('receipt'), {
+                scale: 2 // Increase scale for better quality
+            }).then(function(canvas) {
+                var link = document.createElement('a');
+                link.href = canvas.toDataURL('image/jpeg');
+                link.download = 'receipt.jpg';
+                link.click();
+                $('#receipt').addClass('invisible')
+            });
         }
     </script>
 </body>

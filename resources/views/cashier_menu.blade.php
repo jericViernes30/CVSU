@@ -3,15 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/3.3.3/adapter.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
-    <script type="text/javascript" src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     @vite('resources/css/app.css')
     <title>Dashboard</title>
 </head>
 <body class="w-full h-screen bg-[#ffd962]">
-    
-    <div id="cash_management" class="bg-main rounded-md w-1/5 mx-auto hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50" id="scanner">
+    {{-- <div id="cash_management" class="bg-main rounded-md w-1/5 mx-auto hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50" id="scanner">
         <form action="{{route('cash_management')}}" method="POST" class="p-4 text-sm">
             @csrf
             <select name="reason" id="" class="w-full py-2 rounded-sm text-center mb-3 outline-none">
@@ -24,39 +20,167 @@
             </div>
             <button class="w-full py-2 rounded-sm uppercase font-medium bg-[#fefefe]">Confirm</button>
         </form>
-    </div>
+    </div> --}}
     {{-- Top bar --}}
-    <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
+    {{-- <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
         <div class="w-1/6">
             <div class="">
                 <img src="{{asset('images/logo2.png')}}" alt="" class="w-1/2">
             </div>
         </div>
-    </div>
+    </div> --}}
     {{-- main --}}
-    <div id="main" class="w-full flex h-[92%]">
+    <div id="main" class="w-full flex h-full">
         {{-- navigations --}}
-        <div class="w-[5%] py-6">
-            <a href="{{route('dashboard')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/home.png')}}" alt="Home Icon" class="w-1/3">
-                <p class="text-xs">Home</p>
+        <div class="w-[6%] py-6 bg-white">
+            <div class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 mb-3">
+                <img src="{{asset('images/logo-transparent.png')}}" alt="">
+            </div>
+            <a href="{{route('dashboard')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/products-new.png')}}" alt="Home Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Home</p>
             </a>
-            <a href="{{route('cashier')}}" class="flex w-full flex-col items-center justify-center py-4 bg-[#e5e5e5]">
-                <img src="{{asset('images/cashier.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Cashier</p>
+            <a href="{{route('cashier')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 rounded-xl bg-[#f5a7a4]">
+                <img src="{{asset('images/cashier-red.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#e5231a]">Cashier</p>
             </a>
-            <a href="{{route('history')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/history.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">History</p>
+            <a href="{{route('history')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/history-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">History</p>
             </a>
-            <a href="{{route('office.login')}}" class="flex w-full flex-col items-center justify-center py-4" target="__blank">
-                <img src="{{asset('images/ranking.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Back Office</p>
+            <a href="{{route('orders')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/order-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Orders</p>
+            </a>
+            <a href="{{route('inventory')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/inv-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Inventory</p>
+            </a>
+            <a href="{{route('office.login')}}" target="__blank" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/backoffice-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Office</p>
             </a>
         </div>
         {{-- POS --}}
-        <div class="w-[95%] flex py-10 bg-[#e5e5e5]">
-            <div class="w-1/3 block mx-auto bg-[#fefefe] py-4">
+        <div class="w-[94%] grid grid-cols-3 grid-rows-12 bg-[#e5e5e5] p-4 gap-6">
+            <div class="w-full col-span-3 row-span-2 bg-white rounded-xl px-5 py-3">
+                <div class="w-full flex items-center h-full">
+                    <div class="w-1/4 flex gap-5">
+                        <p class="font-semibold">Terminal #:</p>
+                        <p class="text-right">{{ $shift->POS_number }}</p>
+                    </div>
+                    <div class="w-1/4 flex gap-5">
+                        <p class="font-semibold">Cashier:</p>
+                        <p class="text-right">{{ $shift->cashier }}</p>
+                    </div>
+                    <div class="w-1/4 flex gap-5">
+                        <p class="font-semibold">Shift opened:</p>
+                        <p class="text-right">{{ $time }}</p>
+                    </div>
+                    <div class="w-1/4 flex justify-end">
+                        <form action="{{ route('end-shift') }}" method="POST" class="w-1/2">
+                            @csrf
+                            <button class="w-full py-2 border-2 border-main rounded-lg text-main hover:bg-main hover:text-white ease-in-out duration-100">End shift</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full col-start-3 row-start-3 row-span-10 bg-white rounded-xl px-5 py-3">
+                <p class="pb-2 border-b border-[#565857] font-medium text-[#565857]">Today's sales</p>
+                <div class="w-full pt-2">
+                    <div class="w-full flex py-2 border-b">
+                        <p class="font-medium w-1/3">Time</p>
+                        <p class="font-medium w-1/3 text-center">Ticket#</p>
+                        <p class="font-medium w-1/3 text-right">Total</p>
+                    </div>
+                    @foreach ($sales as $sale)
+                        <div class="w-full flex py-1 border-b">
+                            <p class="w-1/3">{{ \Carbon\Carbon::parse($sale->created_at)->format('h:i a') }}</p>
+                            <p class="w-1/3 text-center">{{ $sale->ticket }}</p>
+                            <p class="w-1/3 text-right">&#8369; {{ $sale->total }}.00</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="w-full row-start-3 row-span-7 bg-white rounded-xl px-5 py-3">
+                <p class="pb-2 border-b border-[#565857] font-medium text-[#565857]">Cash drawer</p>
+                <div class="w-full grid grid-cols-2 grid-rows-2 gap-2 h-[90%] pt-4">
+                    <div class="w-full flex flex-col items-center">
+                        <span class="w-[120px] h-[120px] rounded-full border-4 border-main flex items-center justify-center">
+                            <p class="text-lg">&#8369; {{$shift->starting_cash}}.00</p>
+                        </span>
+                        <p class="text-center font-medium">Starting cash</p>
+                    </div>
+                    <div class="w-full flex flex-col items-center">
+                        <span class="w-[120px] h-[120px] rounded-full border-4 border-proceed flex items-center justify-center">
+                            <p class="text-lg">&#8369; {{$cash}}.00</p>
+                        </span>
+                        <p class="text-center font-medium">Cash payments</p>
+                    </div>
+                    <div class="w-full flex flex-col items-center justify-center">
+                        <div class="flex items-center gap-4">
+                            <img src="{{asset('images/paid-in.png')}}" alt="">
+                            <p class="text-lg">&#8369; {{$shift->cash_in === null ? '0.00' : $shift->cash_in . '.0' }}</p>
+                        </div>
+                        <p>Paid in</p>
+                    </div>
+                    <div class="w-full flex flex-col items-center justify-center">
+                        <div class="flex items-center gap-4">
+                            <img src="{{asset('images/paid-out.png')}}" alt="">
+                            <p class="text-lg">&#8369; {{$shift->cash_out === null ? '0.00' : $shift->cash_out . '.0' }}</p>
+                        </div>
+                        <p>Paid out</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full row-start-3 col-start-2 row-span-7 bg-white rounded-xl px-5 py-3">
+                <p class="pb-2 border-b border-[#565857] font-medium text-[#565857]">Sales summary</p>
+                <div class="w-full flex flex-col h-[90%] justify-center gap-5">
+                    <div class="w-full flex items-center justify-evenly">
+                        <div>
+                            <span class="w-[120px] h-[120px] rounded-full border-4 border-[#565857] flex items-center justify-center">
+                                <p class="text-lg">&#8369; {{$cash}}.00</p>
+                            </span>
+                            <p class="text-center font-medium">Gross sales</p>
+                        </div>
+                        <div>
+                            <span class="w-[120px] h-[120px] rounded-full border-4 border-[#565857] flex items-center justify-center">
+                                <p class="text-lg">&#8369; {{$net_sales}}</p>
+                            </span>
+                            <p class="text-center font-medium">Net sales</p>
+                        </div>
+                    </div>
+                    <div class="w-full flex flex-col items-center justify-center">
+                        <span class="w-[120px] h-[120px] rounded-full border-4 border-proceed flex items-center justify-center">
+                            <p class="text-xl">&#8369; {{($shift->closing_cash + $shift->cash_in) - $shift->cash_out}}.00</p>
+                        </span>
+                        <p class="font-medium">Expected Cash Amount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full row-start-10 row-span-3 bg-white rounded-xl px-5 py-3">
+                <p class="pb-2 border-b border-[#565857] font-medium text-[#565857]">Money in / Gcash (Cash-in) / Load</p>
+                <div class="w-full pt-3">
+                    <form action="{{route('cash_management')}}" method="POST">
+                        @csrf
+                        <input id="pay" type="text" name="amount" placeholder="Enter amount" class="w-full outline-none rounded-lg px-4 py-1 border border-[#565857] mb-4">
+                        <input type="hidden" name="reason" value="paid_in">
+                        <button type="submit" class="w-full border border-main rounded-lg py-1 text-red hover:bg-main hover:text-white ease-in-out duration-100">Pay</button>
+                    </form>
+                </div>
+            </div>
+            <div class="w-full row-start-10 row-span-3 col-start-2 bg-white rounded-xl px-5 py-3">
+                <p class="pb-2 border-b border-[#565857] font-medium text-[#565857]">Money out / Gcash (Cash-out)</p>
+                <div class="w-full pt-3">
+                    <form action="{{route('cash_management')}}" method="POST">
+                        @csrf
+                        <input id="pay1" type="text" name="amount" placeholder="Enter amount" class="w-full outline-none rounded-lg px-4 py-1 border border-[#565857] mb-4">
+                        <input type="hidden" name="reason" value="paid_out">
+                        <button type="submit" class="w-full border border-main rounded-lg py-1 text-red hover:bg-main hover:text-white ease-in-out duration-100">Pay</button>
+                    </form>
+                </div>
+            </div>
+            {{-- <div class="w-1/3 bg-[#fefefe] py-4 h-fit">
                 <div class="w-full flex gap-2 items-center justify-evenly py-2 px-4 mb-2">
                     <button onclick="openCashManagement()" class="w-1/2 py-2 border-2 border-main rounded-sm text-main">Cash management</button>
                     <form action="{{ route('end-shift') }}" method="POST" class="w-1/2">
@@ -105,10 +229,22 @@
                 <div>
                     
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
     <script>
+        document.getElementById('pay').addEventListener('input', function (e) {
+            let value = e.target.value;
+            // Remove all non-digit characters
+            e.target.value = value.replace(/\D/g, '');
+            });
+
+            document.getElementById('pay1').addEventListener('input', function (e) {
+            let value = e.target.value;
+            // Remove all non-digit characters
+            e.target.value = value.replace(/\D/g, '');
+            });
+
         function setAmount(amount){
             event.preventDefault()
             var cash = document.getElementById('cash')

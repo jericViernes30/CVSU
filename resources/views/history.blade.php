@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://kit.fontawesome.com/5bf9be4e76.js" crossorigin="anonymous"></script>
+    {{-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> --}}
+    <script src="{{ asset('jquery/jquery.js') }}"></script>
     @vite('resources/css/app.css')
     <title>Dashboard</title>
 </head>
@@ -35,41 +35,52 @@
         </div>
     </div>
     {{-- Top bar --}}
-    <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
+    {{-- <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
         <div class="w-1/6">
             <div class="">
                 <img src="{{asset('images/logo2.png')}}" alt="" class="w-1/2">
             </div>
         </div>
-    </div>
+    </div> --}}
     {{-- main --}}
-    <div id="main" class="w-full flex h-[92%] z-0">
+    <div id="main" class="w-full flex h-full z-0">
         {{-- navigations --}}
-        <div class="w-[5%] py-6">
-            <a href="{{route('dashboard')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/home.png')}}" alt="Home Icon" class="w-1/3">
-                <p class="text-xs">Home</p>
-            </a>
-            <a href="{{route('cashier')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/cashier.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Cashier</p>
-            </a>
-            <div class="flex w-full flex-col items-center justify-center py-4 bg-[#e5e5e5]">
-                <img src="{{asset('images/history.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">History</p>
+        <div class="w-[6%] py-6 bg-white">
+            <div class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 mb-3">
+                <img src="{{asset('images/logo-transparent.png')}}" alt="">
             </div>
-            <a href="{{route('office.login')}}" class="flex w-full flex-col items-center justify-center py-4" target="__blank">
-                <img src="{{asset('images/ranking.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Back Office</p>
+            <a href="{{route('dashboard')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/products-new.png')}}" alt="Home Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Home</p>
+            </a>
+            <a href="{{route('cashier')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/cashier-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Cashier</p>
+            </a>
+            <a href="{{route('history')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 rounded-xl bg-[#f5a7a4]">
+                <img src="{{asset('images/history-red.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#e5231a]">History</p>
+            </a>
+            <a href="{{route('inventory')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/inv-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Inventory</p>
+            </a>
+            <a href="{{route('orders')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/order-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Orders</p>
+            </a>
+            <a href="{{route('office.login')}}" target="__blank" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/backoffice-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Office</p>
             </a>
         </div>
         {{-- POS --}}
-        <div class="w-[95%] flex p-6 bg-[#e5e5e5]">
-            <div class="w-full block mx-auto shadow-2xl rounded-md p-4 bg-[#f4f4f4] overflow-hidden">
+        <div class="w-[94%] flex p-6 bg-[#e5e5e5]">
+            <div class="w-full block mx-auto shadow-2xl rounded-xl p-4 bg-[#f4f4f4] overflow-hidden">
                 <div class="mb-5">
                     <form action="{{route('purchased_date')}}" method="GET" class="flex gap-2 items-center">
                         <input type="date" id="date" name="date" class="px-2 py-1 border border-bd rounded-md">
-                        <button class="px-10 py-1 bg-main uppercase rounded-md text-white">Filter</button>
+                        <button class="px-10 py-1 bg-main rounded-md text-white">Filter</button>
                     </form>
                     <script>
                         // Get today's date
@@ -95,9 +106,9 @@
                             <p class="w-[15%]">{{ $sale->cashier }}</p>
                             <p class="w-[20%]">{{ $sale->customer }}</p>
                             <p class="w-[10%]">{{ $sale->type }}</p>
-                            <p class="w-[15%]">&#8369; {{ $sale->total }}</p>
+                            <p class="w-[15%]">&#8369; {{ $sale->total }}.00</p>
                             <div class="w-[5%]">
-                                <button onclick="view({{ $sale->ticket }})" class="w-full py-1 bg-main rounded-md uppercase block mx-auto text-white text-sm">
+                                <button onclick="view({{ $sale->ticket }})" class="w-full py-1 bg-main rounded-lg block mx-auto text-white text-sm">
                                     View
                                 </button>
                             </div>

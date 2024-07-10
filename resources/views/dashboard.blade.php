@@ -3,17 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/3.3.3/adapter.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
-    <script type="text/javascript" src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+    <script src="{{ asset('jquery/jquery.js') }}"></script>
     @vite('resources/css/app.css')
     <title>Dashboard</title>
 </head>
-<body class="w-full h-screen relative bg-[#ffd962]">
-    <div class="w-2/4 mx-auto absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 hidden" id="scanner">
-        <video class="mx-auto" id="preview" width="50%"></video><br>
-    </div>
+<body class="w-full h-screen relative">
     <div id="quantity-div" class="w-1/6 p-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 hidden">
         <p>Input quantity</p>
         <input type="number" id="quantity-input" class="w-full py-2 text-center rounded-sm outline-none border" value="1">
@@ -23,61 +18,107 @@
         <video class="mx-auto" id="preview" width="100%"></video><br>
     </div>
     {{-- Top bar --}}
-    <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
+    {{-- <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
         <div class="w-1/6">
             <div class="">
                 <img src="{{asset('images/logo2.png')}}" alt="" class="w-1/2">
             </div>
         </div>
-        <div class="w-10/12 flex items-center">
-            <input id="search" type="search" name="search" placeholder="Search here ..." class="py-1 px-4 outline-none w-[40%] border border-bd rounded-full bg-[#e5e5e5]">
-        </div>
-    </div>
+        <div class="w-10/12 flex items-center"> --}}
+            {{-- <input id="search" type="search" name="search" placeholder="Search here ..." class="py-1 px-4 outline-none w-[40%] border border-bd rounded-full bg-[#e5e5e5]"> --}}
+        {{-- </div>
+    </div> --}}
     {{-- main --}}
-    <div class="w-full flex h-[92%]">
+    <div class="w-full flex h-full">
         {{-- navigations --}}
-        <div class="w-[5%] py-6">
-            <div class="flex w-full flex-col items-center justify-center py-4 bg-[#e5e5e5]">
-                <img src="{{asset('images/home.png')}}" alt="Home Icon" class="w-1/3">
-                <p class="text-xs text-black">Home</p>
+        <div class="w-[6%] py-6 bg-white relative">
+            <div class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 mb-3">
+                <img src="{{asset('images/logo-transparent.png')}}" alt="">
             </div>
-            <a href="{{route('cashier')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/cashier.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Cashier</p>
+            <a href="{{route('dashboard')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 rounded-xl bg-[#f5a7a4]">
+                <img src="{{asset('images/products-red.png')}}" alt="Home Icon" class="w-1/3">
+                <p class="text-xs text-[#e5231a]">Home</p>
             </a>
-            <a href="{{route('history')}}" class="flex w-full flex-col items-center justify-center py-4">
-                <img src="{{asset('images/history.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">History</p>
+            <a href="{{route('cashier')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/cashier-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Cashier</p>
             </a>
-            <a href="{{route('office.login')}}" target="__blank" class="flex w-full flex-col items-center justify-center">
-                <img src="{{asset('images/ranking.png')}}" alt="Cashier Icon" class="w-1/3">
-                <p class="text-xs">Back Office</p>
+            <a href="{{route('history')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/history-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">History</p>
             </a>
+            <a href="{{route('inventory')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/inv-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Inventory</p>
+            </a>
+            <a href="{{route('orders')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/order-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Orders</p>
+            </a>
+            <a href="{{route('office.login')}}" target="__blank" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/backoffice-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Office</p>
+            </a>
+            <button onclick="toggleAlerts()" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 bg-[#dadada] rounded-xl absolute bottom-2 left-4">
+                <img src="{{asset('images/notifications.png')}}" alt="">
+                <div class="w-[30px] h-[30px] flex items-center justify-center bg-[#f5a7a4] rounded-full absolute -top-2 -right-2">
+                    <p class="font-semibold text-main">
+                        {{$alerts->count()}}
+                    </p>
+                </div>
+            </button>
+            <div id="alertsDiv" class="w-[300px] h-[300px] overflow-y-auto hidden rounded-xl absolute bottom-7 left-24 text-xs bg-white border-2 border-main">
+                @foreach ($alerts as $alert)
+                @php
+                    $quantity = $alert->quantity;
+                @endphp
+                    <div class="w-full flex flex-col px-2 py-1 border-b">
+                        <p>
+                            @php
+                                if($quantity >= 1){
+                                    echo '<p class="font-medium">Critically Low Amount</p>';
+                                } else{
+                                    echo '<p class="font-medium">No stocks</p>';
+                                }
+                            @endphp
+                        </p>
+                        <p>{{ $alert->item }} is only <span class="font-medium">{{ $alert->quantity }}</span> remaining in stock.</p>
+                    </div>
+                @endforeach
+            </div>
         </div>
         {{-- POS --}}
-        <div class="w-[95%] flex">
+        <div class="w-[94%] flex bg-[#e4e4e4]">
             {{-- selection --}}
-            <div class="w-3/4 p-6 bg-[#e5e5e5]">
-                <input id="barcode" type="search" name="barcode" placeholder="Barcode" class="py-1 px-4 outline-none w-[20%] border-b border-black mb-2">
-                <div id="foods" class="w-full grid grid-cols-5 grid-rows-6 gap-4 h-[90%]">
+            <div class="w-3/4 p-6 bg-[#e4e4e4]">
+                <div class="w-full flex justify-between">
+                    <div class="relative w-1/4">
+                        <input id="search_item" type="text" name="search" placeholder="Search item" class="w-full rounded-full py-1 px-4 outline-none">
+                        <img src="{{asset('images/search.png')}}" alt="" class="w-[8%] absolute right-2 top-1">
+                    </div>
+                    <input id="barcode" type="search" name="barcode" placeholder="Barcode" class="py-1 px-4 outline-none w-[20%] mb-6 rounded-xl">
+                </div>
+                <div id="foods" class="w-full grid grid-cols-5 grid-rows-5 gap-4 h-[90%] overflow-y-auto">
                     @foreach ($menus as $menu)
-                       <button class="menu-button flex flex-col rounded-2xl shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-main hover:text-white" data-food-name="{{$menu->item}}" data-price="{{$menu->retail}}">
+                       <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="{{$menu->item}}" data-price="{{$menu->retail}}">
                             <p class="">{{$menu->item}}</p>
-                            <p class="font-medium">&#8369; {{$menu->retail}}.00</p>
+                            <p class="font-medium mb-2">&#8369; {{$menu->retail}}.00</p>
+                            <p class="text-xs text-[#a3a3a3]">{{$menu->quantity}} in stock</p>
                        </button>
                     @endforeach
                 </div>
             </div>
             {{-- ticket --}}
-            <div id="ticket" class="w-1/4">
-                <form action="{{route('ticket_details')}}" class="w-full" method="get">
+            <div id="ticket" class="w-1/4 my-auto px-4">
+                <form action="{{route('ticket_details')}}" class="w-full h-[700px] p-4 bg-white border rounded-xl" method="get">
                     @csrf
-                    <div class="w-full flex justify-between p-2 border-b border-bd items-center">
+                    <div class="w-full flex justify-between py-2 border-b border-bd items-center">
                         <div class="w-1/2">
-                            <input id="customer" type="text" name="customer" placeholder="Customer Name" class="w-full border border-bd rounded-full outline-none py-2 px-4 bg-[#e5e5e5]">
+                            <input id="customer" type="text" name="customer" placeholder="Customer Name" class="w-full border border-[#565857] rounded-xl outline-none py-2 px-4">
                         </div>
-                        <div class="w-1/4 text-right">
-                            <p>#1-{{$ticket}}</p>
+                        <div class="w-1/4 items-center justify-center flex flex-col">
+                            <p class="text-xs text-[#565857]">Ticket #:</p>
+                            <p class="font-medium">1-{{$ticket}}</p>
                         </div>
                         <div class="w-1/4 flex justify-end items-center">
                             <button type="button" id="clear" class="w-[25px] h-[25px] rounded-full border border-black flex items-center justify-center">
@@ -86,7 +127,6 @@
                         </div>
                     </div>
                     <div id="orders" class="w-full h-[450px] overflow-y-auto border-b border-bd">
-
                     </div>
                     <div  class="w-full p-2">
                         <div class="w-full">
@@ -100,7 +140,7 @@
                             </div>
                         </div>
                         <div class="w-full flex items-center justify-between gap-2 text-sm text-white">
-                            <button name="action" value="proceed" class="w-full rounded-full py-4 bg-main">
+                            <button disabled id="proceed" name="action" value="proceed" class="w-full rounded-xl py-4 bg-[#565857]">
                                 Proceed
                             </button>
                         </div>
@@ -120,15 +160,60 @@
     
         let orders = [];
         let currentQuantity = 1;
+
+        function toggleAlerts(){
+            let alertsDiv = document.getElementById('alertsDiv')
+            alertsDiv.classList.toggle('hidden')
+        }
+
+        function updateProceedButtonState() {
+            if (orders.length === 0) {
+                $('#proceed').prop('disabled', true);
+                $('#proceed').addClass('bg-[#565857]')
+                $('#proceed').removeClass('bg-main')
+            } else {
+                $('#proceed').prop('disabled', false);
+                $('#proceed').removeClass('bg-[#565857]')
+                $('#proceed').addClass('bg-main')
+            }
+        }
     
         $(document).ready(function() {
-            const customerName = $('#customer')
+            const customerName = $('#customer');
             const barcodeInput = $('#barcode');
             const quantityInput = $('#quantity-input');
             const quantityDiv = $('#quantity-div');
             const submitQuantityButton = $('#submit-quantity');
             const backgroundElement = document.getElementById("background");
-            const scanner = new Instascan.Scanner({ video: document.getElementById('preview'), continuous: true });
+            
+
+            $("#search_item").on('keyup', function(){
+                var key = $(this).val()
+                var url = "{{ route('livesearch', ['key' => ':key']) }}"
+                url = url.replace(':key', key)
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function(response){
+                        var foodsDiv = $('#foods');
+                        foodsDiv.empty(); // Clear the current contents
+
+                        response.menus.forEach(function(menu) {
+                            var menuButton = `
+                            <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="${menu.item}" data-price="${menu.retail}">
+                                <p class="">${menu.item}</p>
+                                <p class="font-medium">&#8369; ${menu.retail}.00</p>
+                            </button>
+                            `;
+                            foodsDiv.append(menuButton);
+                        });
+                    },
+                    error: function(xhr, status, error){
+                        console.error(xhr, status, error);
+                    }
+                })
+            })
     
             // Function to keep the input field focused
             function keepFocus() {
@@ -137,30 +222,6 @@
     
             // Initially set focus to the input field
             keepFocus();
-
-            Instascan.Camera.getCameras().then(function (cameras) {
-                if (cameras.length > 0) {
-                    scanner.start(cameras[0]);
-                } else {
-                    alert('No cameras found!');
-                }
-            }).catch(function (e) {
-                console.error(e);
-            });
-
-            scanner.addListener('scan', function (qr) {
-                
-                var values = qr.split(',');
-                var firstValue = values[0];
-                var secondValue = parseFloat(values[1]);
-
-                // For example, you can log them to the console
-                console.log("First Value:", firstValue);
-                console.log("Second Value:", secondValue);
-
-                addToOrders(firstValue, secondValue);
-                updateOrdersDisplay();
-            });
     
             // Submit quantity button click handler
             submitQuantityButton.on('click', function() {
@@ -168,6 +229,8 @@
                 if (!isNaN(quantity) && quantity > 0) {
                     currentQuantity = quantity;
                     quantityDiv.addClass('hidden');
+                    // Call addToOrders with the specified quantity
+                    addToOrders(itemName, itemPrice, quantity);
                     keepFocus();
                 } else {
                     alert('Please enter a valid quantity');
@@ -212,7 +275,7 @@
                     $('#scanner').toggle('hidden');
                 }
             });
-
+    
             // Function to refocus barcode input when clicking outside
             // $(document).on('click', function(event) {
             //     if (!$(event.target).closest('#search').length) {
@@ -220,8 +283,45 @@
             //     }
             // });
     
-            function addToOrders(firstValue, secondValue) {
-                orders.push({ foodName: firstValue, price: secondValue });
+            function addToOrders(itemName, itemPrice, quantity) {  // Set default quantity to 1
+                let found = false;
+                
+                // Ensure quantity is a positive integer
+                quantity = parseInt(currentQuantity);
+                if (isNaN(quantity) || quantity <= 0) {
+                    quantity = 1;
+                }
+                
+                for (let i = 0; i < orders.length; i++) {
+                    if (orders[i].foodName === itemName) {
+                        orders[i].quantity += quantity;  // Increment by the specified quantity
+                        orders[i].total += itemPrice * quantity;  // Update total price
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found) {
+                    orders.push({ foodName: itemName, price: itemPrice, quantity: quantity, total: itemPrice * quantity });
+                    currentQuantity = 1;
+                }
+                updateProceedButtonState();
+            }
+
+    
+            function removeFromOrders(itemName) {
+                for (let i = 0; i < orders.length; i++) {
+                    if (orders[i].foodName === itemName) {
+                        if (orders[i].quantity > 1) {
+                            orders[i].quantity--;
+                            orders[i].total -= orders[i].price;
+                        } else {
+                            orders.splice(i, 1);
+                        }
+                        break;
+                    }
+                }
+                updateProceedButtonState();
             }
     
             function updateOrdersDisplay() {
@@ -229,39 +329,64 @@
                 var payableElement = $('#payable');
                 var totalElement = $('#total');
                 var total = 0;
-    
-                ordersContainer.html('');
-    
+
+                // Count occurrences and calculate totals
+                var itemCounts = {};
                 orders.forEach((order) => {
-                    total += order.price;
-    
-                    var orderDiv = $('<div></div>').addClass('w-full flex justify-between items-center px-4 py-2');
-    
-                    var orderedFoodElement = $('<p></p>').text(order.foodName);
-                    orderDiv.append(orderedFoodElement);
-    
-                    var priceElement = $('<p></p>').text(order.price.toFixed(2));
-                    orderDiv.append(priceElement);
-    
-                    var inputElement = $('<input>').attr({ type: 'hidden', name: 'food_name[]', value: order.foodName });
-                    orderDiv.append(inputElement);
-    
-                    var totalPriceElement = $('<input>').attr({ type: 'hidden', name: 'total', value: total.toFixed(2) });
-                    orderDiv.append(totalPriceElement);
-    
-                    ordersContainer.append(orderDiv);
+                    if (itemCounts.hasOwnProperty(order.foodName)) {
+                        itemCounts[order.foodName].count++;
+                        itemCounts[order.foodName].total += order.price;
+                    } else {
+                        itemCounts[order.foodName] = { count: order.quantity, price: order.price, total: order.total };
+                    }
                 });
-    
+
+                ordersContainer.html('');
+
+                // Update display with item counts and totals
+                Object.keys(itemCounts).forEach((itemName) => {
+                    var item = itemCounts[itemName];
+                    
+                    var orderDiv = $('<div></div>').addClass('w-full flex items-center text-sm py-2 overflow-x-hidden');
+                    var firstDiv = $('<div></div>').addClass('w-[73%] flex flex-col justify-center');
+                    var secondDiv = $('<div></div>').addClass('w-[20%] flex items-center justify-between');
+                    var deleteDiv = $('<div></div>').addClass('w-[7%] flex items-center justify-center');
+
+                    var orderedFoodElement = $('<p></p>').text(itemName).addClass('text-xs');
+                    var orderedFoodCount = $('<p></p>').text('₱' + item.price.toFixed(2) + ' x ' + item.count).addClass('text-xs');
+                    firstDiv.append(orderedFoodElement);
+                    firstDiv.append(orderedFoodCount);
+
+                    var priceElement = $('<p></p>').html('&#8369; ' + item.total.toFixed(2));
+                    secondDiv.append(priceElement);
+
+                    // Create inputs based on quantity
+                    for (var i = 0; i < item.count; i++) {
+                        var inputElement = $('<input>').attr({type: 'hidden', name: 'food_name[]', value: itemName})
+                        firstDiv.append(inputElement);
+                    }
+
+                    var deleteButton = $('<button></button>').text('-').addClass('delete-button bg-red-500 text-white px-2 py-1 rounded').data('item-name', itemName);
+                    deleteDiv.append(deleteButton);
+
+                    orderDiv.append(firstDiv);
+                    orderDiv.append(secondDiv);
+                    orderDiv.append(deleteDiv);
+
+                    ordersContainer.append(orderDiv);
+
+                    total += item.total;
+                });
+
                 totalElement.text(total.toFixed(2));
                 payableElement.text(total.toFixed(2));
+                updateProceedButtonState();
             }
-    
-            function hideQuantityDiv() {
-                $('#quantity-div').addClass('hidden');
-            }
+
+
     
             // Event listener for button clicks
-            $('.menu-button').on('click', function() {
+            $('#foods').on('click', '.menu-button', function() {
                 let foodName = $(this).data('food-name');
                 let price = parseFloat($(this).data('price'));
     
@@ -274,18 +399,23 @@
                 }
             });
     
+            // Event listener for delete button clicks
+            $('#orders').on('click', '.delete-button', function() {
+                let itemName = $(this).data('item-name');
+                removeFromOrders(itemName);
+                updateOrdersDisplay();
+            });
+    
             // Trigger barcode scanning automatically
             keepFocus();
-
+    
             $('#clear').on('click', function(event){
                 event.preventDefault();
                 orders = [];
                 updateOrdersDisplay();
-            })
+            });
         });
     </script>
-    
-    
     
 </body>
 </html>
