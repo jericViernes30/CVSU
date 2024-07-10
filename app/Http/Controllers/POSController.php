@@ -7,6 +7,8 @@ use App\Models\Ticket;
 use App\Models\History;
 use App\Models\Shift;
 use App\Models\Stocks;
+use App\Models\Supplier;
+use App\Models\SupplierOrder;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
@@ -25,6 +27,8 @@ class POSController extends Controller
             $today = Carbon::today()->toDateString();
             $menu = Menu::all();
             $items = Stocks::all();
+            $stocks_alert = Stocks::where('quantity', '<=', 20)->get();
+            // dd($stocks_alert);
             $lastTicket = Customer::latest('ticket')->first(); // Retrieve the latest ticket
             $ticket = $lastTicket->ticket + 1;
             $cashier_name = session('cashier_name');
@@ -34,14 +38,20 @@ class POSController extends Controller
             if($shift->isEmpty()){
                 return view('cashier');
             } else {
-                return view('dashboard', ['menus' => $items, 'ticket' => $ticket]);
+                return view('dashboard', ['menus' => $items, 'ticket' => $ticket, 'alerts' => $stocks_alert]);
             }
         }
     }
 
-    public function livesearch($key){
-        // Perform the search query
-        $menus = Stocks::where('item', 'LIKE', "%{$key}%")->get();
+    public function livesearch($key = null)
+    {
+        if (empty($key)) {
+            // Return all items if the search key is empty
+            $menus = Stocks::all();
+        } else {
+            // Perform the search query
+            $menus = Stocks::where('item', 'LIKE', "%{$key}%")->get();
+        }
 
         // Return the results as a JSON response
         return response()->json(['menus' => $menus]);
@@ -90,11 +100,19 @@ class POSController extends Controller
             $foodPrices[$price->item] = $price->retail;
         }
 
+        $time = Ticket::where('ticket', $ticket)
+                ->orderBy('created_at', 'desc')
+                ->pluck('created_at')
+                ->first();
+
+        $time_formatted = Carbon::parse($time)->format('F d, Y \a\t h:ia');
+
         return view('order_details', [
             'ticket' => $ticket,
             'customer' => $customer,
             'foods' => $foods,
-            'prices' => $foodPrices
+            'prices' => $foodPrices,
+            'time' => $time_formatted
         ]);
     }
 
@@ -180,11 +198,20 @@ class POSController extends Controller
     }
 
     public function cashier(){
+        $pos_number = session('pos_number');
         $cashier_name = session('cashier_name');
+        $stocks_alert = Stocks::where('quantity', '<=', 20)->get();
         $shift = Shift::where('cashier', $cashier_name)
                     ->whereDate('created_at', Carbon::today())
                     ->latest()
                     ->first();
+        
+        $shift_start = $shift->created_at;
+
+        $date_today = Carbon::today();
+        $sales_today = History::whereDate('created_at', $date_today)->get();
+
+        $formatted_shift_start = Carbon::parse($shift_start)->format('F d, Y \- h:ia');
 
         $shift_sales_total = History::where('cashier', $cashier_name)
                     ->whereDate('created_at', Carbon::today()) //created at must be the date today formatted by 2024-05-17. Get only the date part of the created_at
@@ -202,7 +229,11 @@ class POSController extends Controller
             return view('cashier_menu',[
                 'shift' => $shift,
                 'net_sales' => $net_sales,
-                'cash' => $shift_sales_total
+                'cash' => $shift_sales_total,
+                'pos' => $pos_number,
+                'alerts' => $stocks_alert,
+                'time' => $formatted_shift_start,
+                'sales' => $sales_today
             ]);
         }
     }
@@ -210,24 +241,25 @@ class POSController extends Controller
     public function startShift(Request $request){
         $cashier_name = session('cashier_name');
         $pos = session('pos_number');
+        $stocks_alert = Stocks::where('quantity', '<=', 20)->get();
         
         $starting_cash = $request->input('starting_cash');
 
         $data = [
             'cashier' => $cashier_name,
             'POS_number' => $pos,
-            'starting_cash' => $starting_cash
+            'starting_cash' => $starting_cash,
         ];
 
         $data['closing_cash'] = 0;
 
         Shift::create($data);
 
-        $items = Stocks::where('category', 'Groceries')->get();
+        $items = Stocks::all();
         $lastTicket = Customer::latest('ticket')->first(); // Retrieve the latest ticket
         $ticket = $lastTicket->ticket + 1;
         $cashier_name = session('cashier_name');
-        return view('dashboard', ['menus' => $items, 'ticket' => $ticket]);
+        return view('dashboard', ['menus' => $items, 'ticket' => $ticket, 'alerts' => $stocks_alert]);
     }
 
     public function historyTicket(Request $request, $ticket){
@@ -305,4 +337,99 @@ class POSController extends Controller
             }
         }
     }
+
+    public function inventory(){
+        $data = Stocks::paginate(8);
+        return view('pos_inventory', ['item' => $data]);
+    }
+
+    public function itemSearch($key = null)
+    {
+        if (empty($key)) {
+            // Return all items if the search key is empty
+            $menus = Stocks::all();
+        } else {
+            // Perform the search query
+            $menus = Stocks::where('item', 'LIKE', "%{$key}%")->get();
+        }
+
+        // Return the results as a JSON response
+        return response()->json(['menus' => $menus]);
+    }
+
+    public function orders(){
+        $distinctSuppliers = SupplierOrder::distinct()->where('status', 'Pending')->pluck('supplier');
+        $suppliers = [];
+
+        foreach ($distinctSuppliers as $supplier) {
+            $supplierOrders = SupplierOrder::where('supplier', $supplier)->where('status', 'Pending')->get();
+            $supplierCount = $supplierOrders->count();
+            $supplierQuantitySum = $supplierOrders->sum('quantity');
+            $suppliers[$supplier] = [
+                'orders' => $supplierOrders,
+                'count' => $supplierCount,
+                'quantity_sum' => $supplierQuantitySum
+            ];
+        }
+
+        // dd($suppliers);
+
+        return view('orders', [
+            'suppliers' => $suppliers
+        ]);
+
+    }
+
+    public function ordersFromSupplier($name)
+    {
+        $orders = SupplierOrder::where('supplier', $name)
+                    ->where('status', 'Pending')
+                    ->get();
+
+        // Format the created_at attribute
+        $formattedOrders = $orders->map(function ($order) {
+            $order->created_at = $order->created_at->format('F d, Y');
+            return $order;
+        });
+
+        return response()->json(['orders' => $formattedOrders]);
+    }
+
+    public function completeOrder(Request $request)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:supplier_orders,id', // Ensure each ID exists in the supplier_orders table
+        ]);
+
+        $ids = $validated['ids'];
+
+        // Get all the orders for the provided IDs
+        $orders = SupplierOrder::whereIn('id', $ids)->get();
+
+        foreach ($orders as $order) {
+            // Retrieve the item name and quantity from the order
+            $itemName = $order->item; // Adjust this if your column name is different
+            $quantity = $order->quantity; // Adjust this if your column name is different
+
+            // Find the corresponding item in the Stocks model
+            $stock = Stocks::where('item', $itemName)->first();
+
+            if ($stock) {
+                // Update the quantity in the Stocks model
+                $stock->quantity += $quantity;
+                $stock->update_reason = 'New stocks';
+                $stock->save();
+            }
+        }
+
+        // Update the status to 'Delivered' for the selected IDs
+        SupplierOrder::whereIn('id', $ids)->update(['status' => 'Delivered']);
+
+        return response()->json(['status' => 'success', 'message' => 'Orders updated successfully.']);
+    }
+
+
+
 }

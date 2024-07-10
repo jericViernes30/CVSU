@@ -6,6 +6,8 @@ use App\Exports\SalesReportExport;
 use App\Models\Authentication;
 use App\Models\History;
 use App\Models\Stocks;
+use App\Models\Supplier;
+use App\Models\SupplierOrder;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -106,60 +108,62 @@ class OfficeController extends Controller
         return Excel::download(new SalesReportExport($currentYear, $currentMonth), 'sales_report.xlsx');
     }
 
-    public function dashboard(Request $request){
-        $currentYear = Carbon::now()->year;
-        $currentMonth = Carbon::now()->month;
-    
-        // Get all rows for the current month
-        $rowsThisMonth = History::whereYear('created_at', $currentYear)
-            ->whereMonth('created_at', $currentMonth)
-            ->get();
-    
-        // Initialize arrays to store daily sales and formatted dates
-        $dailySalesFormatted = [];
-        $dailySales = [];
-        $dailyTotalSales = []; // Array to store daily total sales
-        $dailySubTotalSales = []; // Array to store daily sub_total sales
-    
-        // Calculate gross and net sales for the entire month
-        $gross_sales = $rowsThisMonth->sum('total');
-        $net_sales = $rowsThisMonth->sum('sub_total');
-    
-        // Loop through each day of the current month
-        for ($day = 1; $day <= Carbon::now()->daysInMonth; $day++) {
-            // Create a Carbon instance for the current date
-            $date = Carbon::createFromDate($currentYear, $currentMonth, $day);
-    
-            // Format the date as "Month Day, Year" (e.g., "April 24, 2024")
-            $formattedDate = $date->isoFormat('MMMM D, YYYY');
-    
-            // Get all rows with the current date in the created_at column
-            $rowsWithDate = $rowsThisMonth->where('created_at', '>=', $date->startOfDay())
-                ->where('created_at', '<=', $date->endOfDay());
-    
-            // Calculate total sales for the current date
-            $totalSales = $rowsWithDate->sum('total');
-            $subTotalSales = $rowsWithDate->sum('sub_total');
-    
-            // Store the total sales in the array with the formatted date as the key
-            $dailySalesFormatted[$formattedDate] = $totalSales;
-            $dailySales[$date->day] = $totalSales;
-    
-            // Store the daily total sales
-            $dailyTotalSales[$formattedDate] = $rowsWithDate->sum('total');
-            $dailySubTotalSales[$formattedDate] = $subTotalSales;
-        }
-    
-        // Pass $dailySalesFormatted and $dailyTotalSales to your view
-        return view('backoffice/admin_dashboard', [
-            'sales' => $dailySalesFormatted,
-            'dailySales' => $dailySales, // Pass daily sales for charting
-            'dailyTotalSales' => $dailyTotalSales, // Pass daily total sales
-            'dailySubTotalSales' => $dailySubTotalSales, // Pass daily sub_total sales
-            'gross_sales' => $gross_sales,
-            'net_sales' => $net_sales
-        ]);
+    public function dashboard(Request $request)
+{
+    $currentYear = Carbon::now()->year;
+    $currentMonth = Carbon::now()->month;
+
+    // Get all rows for the current month
+    $rowsThisMonth = History::whereYear('created_at', $currentYear)
+        ->whereMonth('created_at', $currentMonth)
+        ->get();
+
+    // Initialize arrays to store daily sales and formatted dates
+    $dailySalesFormatted = [];
+    $dailySales = [];
+    $dailyTotalSales = [];
+    $dailySubTotalSales = [];
+
+    // Calculate gross and net sales for the entire month
+    $gross_sales = $rowsThisMonth->sum('total');
+    $net_sales = $rowsThisMonth->sum('sub_total');
+
+    // Group by day and calculate totals
+    $groupedByDay = $rowsThisMonth->groupBy(function($row) {
+        return Carbon::parse($row->created_at)->toDateString(); // Group by date (Y-m-d)
+    });
+
+    foreach ($groupedByDay as $date => $rows) {
+        // Create a Carbon instance for the current date
+        $dateInstance = Carbon::parse($date);
+
+        // Format the date as "Month Day, Year" (e.g., "April 24, 2024")
+        $formattedDate = $dateInstance->isoFormat('MMMM D, YYYY');
+
+        // Calculate total sales for the current date
+        $totalSales = $rows->sum('total');
+        $subTotalSales = $rows->sum('sub_total');
+
+        // Store the total sales in the array with the formatted date as the key
+        $dailySalesFormatted[$formattedDate] = $totalSales;
+        $dailySales[$dateInstance->day] = $totalSales;
+
+        // Store the daily total sales
+        $dailyTotalSales[$formattedDate] = $totalSales;
+        $dailySubTotalSales[$formattedDate] = $subTotalSales;
     }
+
+    // Pass $dailySalesFormatted and $dailyTotalSales to your view
+    return view('backoffice/admin_dashboard', [
+        'sales' => $dailySalesFormatted,
+        'dailySales' => $dailySales,
+        'dailyTotalSales' => $dailyTotalSales,
+        'dailySubTotalSales' => $dailySubTotalSales,
+        'gross_sales' => $gross_sales,
+        'net_sales' => $net_sales
+    ]);
+}
+
     
 
     public function getMonthlySales(Request $request)
@@ -247,6 +251,14 @@ class OfficeController extends Controller
     //         'total_retail' => $total_retail
     //     ]);
     // }
+
+    public function purchasedDate(Request $request){
+        $date = $request->input('date');
+        // Query to fetch records with matching date
+        $history = History::whereDate('created_at', $date)->paginate(10);
+
+        return view('backoffice/sales_history', ['history' => $history]);
+    }
     
 
     public function stocksAdjustment(){
@@ -260,7 +272,11 @@ class OfficeController extends Controller
     }
     
     public function createItem(){
-        return view('backoffice/items/create_item');
+        $suppliers = Supplier::all();
+        return view('backoffice/items/create_item',[
+            'suppliers' => $suppliers
+        ]
+        );
     }
 
     public function addItem(Request $request){
@@ -284,9 +300,9 @@ class OfficeController extends Controller
         $data = [
             'item' => $request->input('item_name'),
             'category' => $request->input('category'),
-            'description' => $request->input('description'),
-            'sku' => $request->input('item_sku'),
-            'qr' => $request->input('item_qr'),
+            'supplier' => $request->input('supplier'),
+            'product_unit' => $request->input('product_unit'),
+            'barcode' => $request->input('barcode'),
             'quantity' => $quantity,
             'cost' => $request->input('cost'),
             'retail' => $request->input('retail'),
@@ -301,25 +317,24 @@ class OfficeController extends Controller
     }
     
     public function viewItem($sku){
-        $item = Stocks::where('sku', $sku)->first();
+        $item = Stocks::where('id', $sku)->first();
+        $suppliers = Supplier::all();
 
-        return view('backoffice/items/item_details', ['item' => $item]);
+        return view('backoffice/items/item_details', ['item' => $item, 'suppliers' => $suppliers]);
     }
 
     public function updateItem(Request $request){
         $stocks = Stocks::all();
-        $sku = $request->input('item_sku');
-        $item = Stocks::where('sku', $sku)->first();
-        $profit = 0;
+        $barcode = $request->input('barcode');
+        $item = Stocks::where('barcode', $barcode)->first();
         $cost = $request->input('cost');
         $retail = $request->input('retail');
-        $profit = $retail - $cost;
         if($item){
             $item->item = $request->input('item_name');
             $item->category = $request->input('category');
-            $item->description = $request->input('description');
-            $item->sku = $request->input('item_sku');
-            $item->qr = $request->input('item_qr');
+            $item->supplier = $request->input('supplier');
+            $item->product_unit = $request->input('product_unit');
+            $item->barcode = $request->input('barcode');
             $item->cost = $request->input('cost');
             $item->retail = $request->input('retail');
 
@@ -354,7 +369,7 @@ class OfficeController extends Controller
 
     public function salesByItem(){
         $topItems = Ticket::select('food_name', DB::raw('COUNT(*) AS occurrence'))
-            ->whereMonth('created_at', '=', 6) // Filter for June
+            ->whereMonth('created_at', '=', 7) // Filter for June
             ->groupBy('food_name')
             ->orderByDesc('occurrence')
             ->limit(10)
@@ -515,4 +530,79 @@ class OfficeController extends Controller
         $cashiers = Authentication::where('role', 'Cashier')->get();
         return view('backoffice/cashiers/cashiers', ['cashiers' => $cashiers]);
     }
+
+    public function suppliers(){
+        $supplier = Supplier::all();
+        return view('backoffice/suppliers/suppliers', [
+            'suppliers' => $supplier
+        ]);
+    }
+    
+    public function addSuppliers(Request $request){
+        // dd($request);
+        $supplier = Supplier::all();
+        $data = [
+            'name' => $request->input('supplier_name')
+        ];
+
+        $add = Supplier::create($data);
+
+        if($add){
+            return redirect()->intended(route('office.supplier', ['suppliers' => $supplier]));
+        }
+    }
+
+    public function ordering(){
+        $orders = SupplierOrder::all();
+        return view('backoffice/ordering/ordering', [
+            'orders' => $orders
+        ]);
+    }
+
+    public function itemSearch($key = null){
+        // Check if the search key is empty
+        if (empty($key)) {
+            // Return an empty array if no key is provided
+            return response()->json(['items' => []]);
+        }
+    
+        // Perform the search query if the key is not empty
+        $items = Stocks::where('item', 'LIKE', "%{$key}%")->get();
+    
+        // Return the results as a JSON response
+        return response()->json(['items' => $items]);
+    }
+
+    public function supplierSearch($key = null){
+        // Check if the search key is empty
+        if (empty($key)) {
+            // Return an empty array if no key is provided
+            return response()->json(['items' => []]);
+        }
+    
+        // Perform the search query if the key is not empty
+        $items = Supplier::where('name', 'LIKE', "%{$key}%")->get();
+    
+        // Return the results as a JSON response
+        return response()->json(['items' => $items]);
+    }
+
+    public function placeOrder(Request $request){
+        // dd($request);
+        $orders = SupplierOrder::all();
+        $status = 'Pending';
+        $data = [
+            'item' => $request->input('item_name'),
+            'quantity' => $request->input('item_quantity'),
+            'supplier' => $request->input('supplier_name'),
+            'status' => $status
+        ];
+
+        $placeOrder = SupplierOrder::create($data);
+
+        if($placeOrder){
+            return redirect()->intended(route('office.ordering', ['orders' => $orders]));
+        }
+    }
+    
 }
