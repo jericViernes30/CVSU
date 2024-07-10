@@ -12,9 +12,9 @@ class Stocks extends Model
     protected $fillable = [
         'item',
         'category',
-        'description',
-        'sku',
-        'qr',
+        'supplier',
+        'product_unit',
+        'barcode',
         'quantity',
         'cost',
         'retail',

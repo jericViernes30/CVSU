@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('item');
             $table->string('category');
-            $table->string('description');
-            $table->string('sku');
-            $table->string('qr');
+            $table->string('supplier');
+            $table->string('product_unit');
+            $table->string('barcode');
             $table->string('quantity');
-            $table->string('cost');
-            $table->string('retail');
-            $table->string('update_reason');
+            $table->float('cost');
+            $table->float('retail');
+            $table->string('update_reason')->nullable();
             $table->timestamps();
         });
     }
