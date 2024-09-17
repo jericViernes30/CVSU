@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Authentication;
 use App\Models\Admin;
+use App\Models\PendingAccount;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
@@ -16,12 +17,7 @@ class AuthController extends Controller
     public function authLoginCashier(Request $request)
     {
         // dd($request);
-        $pos_number = $request->input('POS');
-        $request->validate([
-            'POS' => 'required',
-            'name' => 'required',
-            'password' => 'required'
-        ]);
+        $pos_number = 'pos1';
 
         $credentials = $request->only('name', 'password');
 
@@ -96,7 +92,8 @@ class AuthController extends Controller
         }
         
         $cashiers = Authentication::all();
-        return view('backoffice/cashiers/cashiers', ['cashiers' => $cashiers]);
+        $pending = PendingAccount::all();
+        return view('backoffice/cashiers/cashiers', ['cashiers' => $cashiers, 'pendings' => $pending])->with('success', 'Cashier added successfully!');
     }
 
     public function addAdmin(){
@@ -135,5 +132,52 @@ class AuthController extends Controller
 
         // Redirect to the login page
         return redirect()->route('welcome'); // Adjust the redirect path as needed
+    }
+
+    public function forgotPassword(Request $request){
+        $cashier = Authentication::where('name', $request->username)->get();
+        // dd($cashier->isEmpty());
+        if($cashier->isEmpty()){
+            return redirect()->back()->withErrors(['error' => 'Cashier not found!']);
+        } else {
+            return view('reset_password/reset_password', ['cashier' => $cashier]);
+        }
+    }
+
+    public function changePassword(Request $request){
+        // dd($request);
+        $new_password = Hash::make($request->new_password);
+        $cashier = Authentication::where('name', $request->name)->first();
+
+        if($cashier){
+            $cashier->password = $new_password;
+
+            $cashier->save();
+
+        return redirect()->route('welcome')->with('success', 'Password changed successfully!');
+        }
+    }
+
+    public function registerView(){
+        return view('accounts.register');
+    }
+
+    public function register(Request $request){
+        $name = $request->name;
+        $password = $request->password;
+        $hashedPassword = Hash::make($password);
+
+        $data = [
+            'name' => $name,
+            'password' => $hashedPassword
+        ];
+
+        $create = PendingAccount::create($data);
+
+        if($create){
+            return redirect()->route('welcome')->with('success', 'Account successfully submitted!');
+        } else{
+            return redirect()->back()->withErrors('error', 'Account submission failed!');
+        }
     }
 }
