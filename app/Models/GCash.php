@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Supplier extends Model
+class GCash extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'contact_number',
-        'contact_person',
-        'address'
+        'transaction_number',
+        'type',
+        'amount',
+        'charge'
     ];
 }

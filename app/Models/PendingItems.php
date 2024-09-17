@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Stocks extends Model
+class PendingItems extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'item',
         'category',
@@ -20,11 +19,5 @@ class Stocks extends Model
         'quantity',
         'cost',
         'retail',
-        'update_reason',
     ];
-
-    public function ticket()
-    {
-        return $this->hasOne(Ticket::class, 'food_name', 'item');
-    }
 }

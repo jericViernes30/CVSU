@@ -11,8 +11,10 @@ class SupplierOrder extends Model
 
     protected $fillable = [
         'item',
+        'batch_number',
         'quantity',
         'supplier',
-        'status'
+        'status',
+        'expiration_date'
     ];
 }

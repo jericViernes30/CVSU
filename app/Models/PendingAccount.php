@@ -5,14 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Supplier extends Model
+class PendingAccount extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'name',
-        'contact_number',
-        'contact_person',
-        'address'
+        'password'
     ];
 }
