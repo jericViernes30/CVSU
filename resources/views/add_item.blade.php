@@ -3,81 +3,61 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://kit.fontawesome.com/5bf9be4e76.js" crossorigin="anonymous"></script>
+    <script src="{{ asset('jquery/jquery.js') }}"></script>
     @vite('resources/css/app.css')
-    <title>Back Office</title>
+    <title>Dashboard</title>
 </head>
-<body class="w-full h-screen bg-[#fefefe]">
+<body class="w-full h-screen bg-[#ffd962]">
     <div id="success_popup" class="hidden bg-white w-1/4 px-7 py-11 rounded-lg absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-        <p class="text-3xl text-green-500 font-medium text-center mb-4">Succesfully added!</p>
-        <p class="text-sm text-[#8e8f8e] text-center">This item is successfully added to your items list.</p>
+        <p class="text-3xl text-green-500 font-medium text-center mb-4">Success!</p>
+        <p class="text-sm text-[#8e8f8e] text-center">Added to items to be reviewed.</p>
     </div>
-    <div class="w-full flex items-center h-[7%] bg-[#db121c] px-10">
-        <p class="text-lg text-white">Create Item</p>
-    </div>
-    <div id="main" class="w-full h-[93%] flex z-0">
-        <div class="w-[5%] pt-10 bg-[#fefefe]">
-            <div class="flex w-2/3 mx-auto flex-col items-center justify-center pb-4 mb-3">
-                <img src="{{asset('images/logo-transparent.png')}}" alt="">
-            </div>
-            <div class="w-full relative">
-                <button onclick="openDashboard()" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/chart-new.png')}}" alt="" class="w-[30px] h-auto">
-                </button>
-                <div id="dash_options" class="hidden w-[200px] absolute left-20 top-0 z-10 bg-slate-50 text-sm">
-                    <div class="w-full flex flex-col py-2">
-                        <a href="{{route('office.dashboard')}}" class="hover:bg-[#e6e6e6] p-2">Sales summary</a>
-                        <a href="{{route('office.sales_by_item')}}" class="hover:bg-[#e6e6e6] p-2">Sales by item</a>
-                        <a href="{{route('office.sales_history')}}" class="hover:bg-[#e6e6e6] p-2">Sales history</a>
-                    </div>
-                </div>
-            </div>
-            <div class="w-full relative">
-                <a href="{{route('office.items_list')}}" class="w-full flex items-center justify-center h-auto py-4 bg-[#f5a7a4]">
-                    <img src="{{asset('images/prod-red.png')}}" alt="" class="w-[30px] h-auto">
-                </a>
-            </div>
-            <div class="w-full relative">
-                <button onclick="openInventoryOptions()" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/inv-new.png')}}" alt="" class="w-[30px] h-auto">
-                </button>
-                <div id="inventory_options" class="hidden w-[200px] absolute left-20 top-0 z-10 bg-slate-50 p-3 text-sm">
-                    <div class="w-full flex flex-col gap-3">
-                        <a href="{{route('office.stocks_adjustment')}}">Stocks Adjustment</a>
-                        <a href="{{route('office.inventory')}}">Inventory</a>
-                    </div>
-                </div>
-            </div>
-            {{-- <div class="w-full relative">
-                <a href="{{route('qr_printing')}}" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/qr.png')}}" alt="" class="w-[30px] h-auto">
-                </a>
-            </div> --}}
-            <div class="w-full relative">
-                <a href="{{route('office.cashiers')}}" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/employee-new.png')}}" alt="" class="w-[30px] h-auto">
-                </a>
-            </div>
-            <div class="w-full relative">
-                <a href="{{route('office.supplier')}}" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/supplier-new.png')}}" alt="" class="w-[30px] h-auto">
-                </a>
-            </div>
-            <div class="w-full relative">
-                <a href="{{route('office.ordering')}}" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/order-new.png')}}" alt="" class="w-[30px] h-auto">
-                </a>
-            </div>
-            <div class="w-full relative">
-                <a href="{{route('office.logout')}}" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/logout-new.png')}}" alt="" class="w-[30px] h-auto">
-                </a>
+    {{-- Top bar --}}
+    {{-- <div class="w-full flex items-center h-[8%] px-20 border-b border-bd">
+        <div class="w-1/6">
+            <div class="">
+                <img src="{{asset('images/logo2.png')}}" alt="" class="w-1/2">
             </div>
         </div>
-        <div class="w-[95%] bg-[#f2f2f2] z-0 p-7">
-            <div class="w-2/3 flex mx-auto shadow-md text-sm">
-                <form id="itemForm" action="{{route('office.add_item')}}" class="w-full" method="POST" enctype="multipart/form-data">
+    </div> --}}
+    {{-- main --}}
+    <div id="main" class="w-full flex h-full z-0">
+        {{-- navigations --}}
+        <div class="w-[6%] py-6 bg-white">
+            <div class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 mb-3">
+                <img src="{{asset('images/logo-transparent.png')}}" alt="">
+            </div>
+            <a href="{{route('dashboard')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/products-new.png')}}" alt="Home Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Home</p>
+            </a>
+            <a href="{{route('cashier')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/cashier-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Cashier</p>
+            </a>
+            <a href="{{route('history')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/history-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">History</p>
+            </a>
+            <a href="{{route('inventory')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4 rounded-xl bg-[#f5a7a4]">
+                <img src="{{asset('images/inv-red.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#e5231a]">Inventory</p>
+            </a>
+            <a href="{{route('orders')}}" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/order-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Orders</p>
+            </a>
+            <a href="{{route('office.login')}}" target="__blank" class="flex w-2/3 mx-auto flex-col items-center justify-center py-4">
+                <img src="{{asset('images/backoffice-new.png')}}" alt="Cashier Icon" class="w-1/3">
+                <p class="text-xs text-[#565857]">Office</p>
+            </a>
+        </div>
+        <div class="w-[94%] flex p-6 bg-[#e5e5e5]">
+            <div class="w-full bg-slate-50 shadow-md rounded-xl p-6">
+                <form id="itemForm" action="{{route('to_pending')}}" class="w-full" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <p class="text-center font-medium text-xl">Add Item</p>
+                    <p class="text-center italic text-[#a1a0a0] text-sm">Items to be reviewed by the owner</p>
                     <div class=" bg-white rounded-md p-10 mb-5">
                         <div class="w-full flex items-center justify-between gap-5 mb-10">
                             <div class="w-1/2">
@@ -157,7 +137,7 @@
                                 <input type="file" name="item_image" class="mt-1">
                             </div>
                             <div class="w-1/2 flex gap-5 items-center justify-end">
-                                <button type="button" id="submitButton" class="w-[100px] bg-main uppercase rounded-sm py-2 shadow-md font-medium text-black text-xs">Add Item</button>
+                                <button type="button" id="submitButton" class="w-[200px] bg-white border-2 border-main hover:bg-main hover:border-2 hover:border-main ease-in-out duration-100 rounded-md py-2 shadow-md font-medium text-xs text-main hover:text-white">Add Item</button>
                             </div>
                         </div>
                     </div>
@@ -180,34 +160,60 @@
             }, 1000); // Adjust the delay as needed
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var qrInput = document.querySelector('input[name="item_qr"]');
-    
-            qrInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent default Enter key behavior
+        $(document).ready(function(){
+            $('#item_search').on('keyup', function(){
+    var key = $(this).val();
+    var url = '{{route("item_search", ["key" => ":key"])}}';
+    url = url.replace(':key', key);
+    // console.log(url)
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(response){
+            var itemDiv = $('#search_result');
+            itemDiv.empty(); // Clear the current contents
+
+            response.menus.forEach(function(menu) {
+                var quantityClass = '';
+                var quantityText = '';
+
+                if (menu.quantity >= 100) {
+                    quantityClass = 'text-green-500 font-medium';
+                    quantityText = 'High amount';
+                } else if (menu.quantity >= 50) {
+                    quantityClass = 'text-blue-500 font-medium';
+                    quantityText = 'Good amount';
+                } else if (menu.quantity >= 20) {
+                    quantityClass = 'text-orange-500 font-medium';
+                    quantityText = 'Low amount';
+                } else if (menu.quantity >= 1) {
+                    quantityClass = 'text-red-500 font-medium';
+                    quantityText = 'Critically low amount';
+                } else if (menu.quantity == 0) {
+                    quantityClass = 'text-red-500 font-medium';
+                    quantityText = 'No stocks';
                 }
+
+                var itemList = `
+                <div class='w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada] text-left'>
+                    <p class='w-[40%]'>${menu.item}</p>
+                    <p class='w-[10%] text-right'>${menu.quantity}</p>
+                    <p class='w-[15%] ${quantityClass} text-right'>${quantityText}</p>
+                    <p class='w-[15%] text-right'>${new Date(menu.updated_at).toLocaleString()}</p>
+                    <p class='w-[20%] text-right'>${menu.update_reason}</p>
+                </div>
+                `;
+                itemDiv.append(itemList);
             });
-        });
-        var main = document.getElementById('main')
-
-        function openInventoryOptions(){
-            var inventoryOptions = document.getElementById('inventory_options')
-            inventoryOptions.classList.toggle('hidden')
-            main.classList.toggle('blur-5px')
+        },
+        error: function(xhr, status, error){
+            console.error(xhr, status, error);
         }
+    })
+});
 
-        function openDashboard(){
-            var inventoryOptions = document.getElementById('dash_options')
-            inventoryOptions.classList.toggle('hidden')
-            main.classList.toggle('blur-5px')
-        }
-
-        function openItems(){
-            var inventoryOptions = document.getElementById('items_options')
-            inventoryOptions.classList.toggle('hidden')
-            main.classList.toggle('blur-5px')
-        }
+        })
     </script>
 </body>
 </html>

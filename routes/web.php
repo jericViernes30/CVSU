@@ -9,9 +9,14 @@ use App\Http\Middleware\isCashierLoggedIn;
 use PhpOffice\PhpSpreadsheet\Calculation\LookupRef\Offset;
 
 Route::get('/', function () {
-    return view('receipt');
+    return view('welcome');
 })->name('welcome');
 Route::post('/login', [AuthController::class, 'authLoginCashier'])->name('auth_login');
+
+Route::POST('/forgot_password', [AuthController::class, 'forgotPassword'])->name('reset_password');
+Route::post('/change_password', [AuthController::class, 'changePassword'])->name('change_password');
+Route::get('/register', [AuthController::class, 'registerView'])->name('register');
+Route::POST('/register', [AuthController::class, 'register'])->name('register.post');
 
 Route::middleware([isCashierLoggedIn::class])->group(function(){
     Route::get('/add', [AuthController::class, 'addCashier'])->name('auth_register');
@@ -32,6 +37,9 @@ Route::middleware([isCashierLoggedIn::class])->group(function(){
     Route::get('/item-search/{key?}', [POSController::class, 'itemSearch'])->name('item_search');
     Route::get('/supplier-name/{name}', [POSController::class, 'ordersFromSupplier'])->name('supplier_name');
     Route::post('/complete-order', [POSController::class, 'completeOrder'])->name('complete_order');
+    Route::post('/gcash', [POSController::class, 'gCash'])->name('gcash');
+    Route::get('/add-item', [POSController::class, 'addItem'])->name('add_item');
+    Route::post('/add-to-pending', [POSController::class, 'toPendingItems'])->name('to_pending');
 });
 
 Route::get('/back-office/login', [OfficeController::class, 'adminLogin'])->name('office.login');
@@ -66,6 +74,16 @@ Route::middleware([IsAdminLoggedIn::class])->group(function(){
     Route::get('/back-office/item_search/{key?}', [OfficeController::class, 'itemSearch'])->name('office.item_search');
     Route::get('/back-office/supplier_search/{key?}', [OfficeController::class, 'supplierSearch'])->name('office.supplier_search');
     Route::POST('/back-office/place-order', [OfficeController::class, 'placeOrder'])->name('office.place_order');
+    Route::get('/back-office/cashiers/add_cashier/{name}', [OfficeController::class, 'acceptAccount'])->name('office.accept');
+    Route::get('/back-office/get_sales_per_month/{date}', [OfficeController::class, 'getSalesPerMonth'])->name('office.get_sales_per_month');
+    Route::get('/back-office/filter-items', [OfficeController::class, 'filterItems'])->name('office.filter_items');
+    Route::get('/back-office/new-order', [OfficeController::class, 'newOrder'])->name('office.new_order');
+    Route::get('/back-office/item-list-search/{key?}', [OfficeController::class, 'itemListsearch'])->name('office.item_list_search');
+    Route::get('/back-office/filter-supplier-address', [OfficeController::class, 'filterSupplierAddress'])->name('office.filter_address');
+    Route::get('/back-office/pending-items', [OfficeController::class, 'pendingItems'])->name('office.pending_items');
+    Route::get('/back-office/accept-item/{id}', [OfficeController::class, 'acceptAddedItem'])->name('office.accept_item');
+    Route::get('/back-office/fetch-order-details', [OfficeController::class, 'fetchBatchDetails'])->name('fetchBatchDetails');
+    Route::get('/back-office/remove-cashier/{id}', [OfficeController::class, 'resignCashier']);
 });
 
 

@@ -13,7 +13,7 @@
         <button onclick="shet()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" height="20" width="20"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
         </button>
-        <p class="text-3xl text-center font-medium pt-7">&#8369;<span id="total_amount">0</span>.00</p>
+        <p class="text-3xl text-center font-medium pt-7">&#8369;<span id="total_amount">0</span></p>
         <p class="text-sm text-center text-gray-500 border-b border-[#bebebe] pb-3">Total</p>
         <p class="px-2 text-sm pt-3 pb-1">Employee: <span id="employee_name">Employee</span></p>
         <p class="px-2 text-sm pt-1 pb-3 border-b border-[#bebebe]">Ticket #: <span id="ticket_number">1-1016</span></p>
@@ -24,11 +24,11 @@
         </div>
         <div class="w-full px-2 flex items-center justify-between pt-3 pb-1 text-sm">
             <p>Cash</p>
-            <p>&#8369;<span id="cash_amount">100</span>.00</p>
+            <p>&#8369;<span id="cash_amount">100</span></p>
         </div>
         <div class="w-full px-2 flex items-center justify-between pt-1 pb-3 text-sm border-b border-[#bebebe]">
             <p>Change</p>
-            <p>&#8369;<span id="change_amount">50</span>.00</p>
+            <p>&#8369;<span id="change_amount">50</span></p>
         </div>
         <div class="w-full px-2 flex items-center pt-2 justify-end text-sm text-gray-500">
             <p id="sale_time">5/8/24 10:49 AM</p>
@@ -90,32 +90,63 @@
                       </script>
                 </div>
                 <div class="w-full h-full">
-                    <div class="w-full flex p-2 bg-[#bebebe] uppercase font-medium">
-                        <p class="w-[15%]">Ticket Number</p>
-                        <p class="w-[20%]">Date</p>
-                        <p class="w-[15%]">Cashier</p>
-                        <p class="w-[20%]">Customer</p>
-                        <p class="w-[10%]">Type</p>
-                        <p class="w-[15%]">Total</p>
-                        <div class="w-[5%]"></div>
-                    </div>
-                    @forelse ($history as $sale)
-                        <div class="w-full flex border-b border-[#bebebe] p-2">
-                            <p class="w-[15%]">1-{{ $sale->ticket }}</p>
-                            <p class="w-[20%]">{{ $sale->created_at->format('F j, Y H:i:s') }}</p>
-                            <p class="w-[15%]">{{ $sale->cashier }}</p>
-                            <p class="w-[20%]">{{ $sale->customer }}</p>
-                            <p class="w-[10%]">{{ $sale->type }}</p>
-                            <p class="w-[15%]">&#8369; {{ $sale->total }}.00</p>
-                            <div class="w-[5%]">
-                                <button onclick="view({{ $sale->ticket }})" class="w-full py-1 bg-main rounded-lg block mx-auto text-white text-sm">
-                                    View
-                                </button>
+                    <div class="w-full flex gap-4">
+                        <div class="w-1/2 flex flex-col h-[640px]">
+                            <p class="text-center font-semibold text-2xl mb-3">Cashier Transactions</p>
+                            <div class="w-full flex items-center p-2 bg-[#bebebe] uppercase font-medium text-sm">
+                                <p class="w-[15%] text-xs">Transaction #</p>
+                                <p class="w-[20%]">Time</p>
+                                <p class="w-[20%]">Customer</p>
+                                <p class="w-[15%]">Type</p>
+                                <p class="w-[15%]">Total</p>
+                                <div class="w-[15%]"></div>
+                            </div>
+                            <div class="flex-1 overflow-y-auto">
+                                @forelse ($history as $sale)
+                                    <div class="w-full flex border-b border-[#bebebe] p-2 text-sm items-center">
+                                        <p class="w-[15%]">{{ $sale->ticket }}</p>
+                                        <p class="w-[20%]">{{ $sale->created_at->format('g:i A') }}</p>
+                                        <p class="w-[20%]">{{ $sale->customer }}</p>
+                                        <p class="w-[15%]">{{ $sale->type }}</p>
+                                        <p class="w-[15%]">&#8369; {{ $sale->total }}</p>
+                                        <div class="w-[15%]">
+                                            @php
+                                                if($sale->type != 'PETTY CASH' && $sale->type != 'PAY IN' && $sale->type != 'CASH IN' && $sale->type != 'CASH OUT'){
+                                            @endphp
+                                                    <button onclick="view({{ $sale->ticket }})" class="w-full py-1 bg-main rounded-lg block mx-auto text-white text-sm">
+                                                        View
+                                                    </button>
+                                            @php
+                                                }
+                                            @endphp
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center text-gray-500 py-4">No purchases made</div>
+                                @endforelse
                             </div>
                         </div>
-                    @empty
-                        <div class="text-center text-gray-500 py-4">No purchases made</div>
-                    @endforelse
+                        <div class="w-1/2">
+                            <p class="text-center font-semibold text-2xl mb-3">GCash Transactions</p>
+                            <div class="w-full flex p-2 bg-[#bebebe] uppercase font-medium text-sm">
+                                <p class="w-[25%]">Reference #</p>
+                                <p class="w-[35%]">Date & Time</p>
+                                <p class="w-[20%]">Transaction</p>
+                                <p class="w-[20%]">Amount</p>
+                            </div>
+                            @forelse ($gcash as $gc)
+                                <div class="w-full flex border-b border-[#bebebe] p-2 text-sm">
+                                    <p class="w-[25%]">{{ $gc->transaction_number }}</p>
+                                    <p class="w-[35%]">{{ $gc->created_at->format('g:i A') }}</p>
+                                    <p class="w-[20%]">{{ $gc->type }}</p>
+                                    <p class="w-[20%]">&#8369; {{ $gc->amount }}</p>
+                                </div>
+                            @empty
+                                <div class="text-center text-gray-500 py-4">No transactions made</div>
+                            @endforelse
+                        </div>
+                    </div>
+                    
                 </div>
             </div>  
         </div>

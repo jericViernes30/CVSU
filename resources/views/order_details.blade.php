@@ -30,6 +30,11 @@
     </style>
 </head>
 <body class="w-full h-screen">
+    <div id="coverup" class="hidden w-full bg-main h-screen absolute z-50 opacity-60"></div>
+    <div id="success_popup" class="hidden bg-white w-1/4 px-7 py-11 rounded-lg absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+        <img src="{{asset('images/success.png')}}" alt="" class="block mx-auto w-[20%] h-auto">
+        <p class="text-3xl text-green-500 font-medium text-center mb-4">Payment successful!</p>
+    </div>
     <div id="receipt" class="invisible w-[80mm] px-5 py-5 bg-white absolute top-0 left-1/2 transform -translate-x-1/2">
         <img src="{{asset('images/receipt-logo.png')}}" alt="" class="block mx-auto pt-3 pb-8 w-[70%]">
         <p class="text-center text-lg font-semibold">MAMATID</p>
@@ -177,47 +182,27 @@
                         </div>
                         <div class="flex justify-end">
                             <div class="w-[30%] p-3">
-                                <div class="w-full flex justify-between">
-                                    <p>Subtotal</p>
-                                    <p>&#8369; {{$subTotal}}</p>
+                                <div class="w-full">
+                                    <select name="" id="discount_select" class="w-full outline-none px-3 py-1 border border-black rounded-xl">
+                                        <option value="">Select discount</option>
+                                        <option value="senior_citizen">Senior Citizen</option>
+                                        <option value="pwd">PWD</option>
+                                    </select>
                                 </div>
                                 <div class="w-full flex justify-between">
-                                    <p>Tax</p>
-                                    <p>&#8369; {{$tax}}</p>
+                                    <p>Discount</p>
+                                    <p id="discount"></p>
                                 </div>
                                 <div class="w-full flex justify-between">
                                     <p class="text-lg font-medium">Total</p>
-                                    <p class="text-lg font-medium">&#8369; {{$pay}}.00</p>
+                                    <p id="total" class="text-lg font-medium">&#8369; {{$pay}}.00</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white py-3 px-5 rounded-xl">
-                        <div class="w-full border-b pb-3">
-                            <p class="font-semibold">Customer Details</p>
-                        </div>
-                        <div class="w-full py-2">
-                            <div class="w-full flex py-1">
-                                <p class="w-1/2">{{ $customer }}</p>
-                                <p class="w-1/2">Philippines</p>
-                            </div>
-                            <div class="w-full flex py-1">
-                                <p class="w-1/2">Not available </p>
-                                <p class="w-1/2">Not available </p>
-                            </div>
-                            <div class="w-full flex py-1">
-                                <p class="w-1/2">Not available </p>
-                                <p class="w-1/2">Not available </p>
-                            </div>
-                            <div class="w-full flex py-1">
-                                <p class="w-1/2">Cash</p>
-                                <p class="w-1/2">Not available</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="w-[40%] bg-white rounded-xl px-5 py-4">
-                    <form action="{{route('sale')}}" method="POST">
+                    <form id="paymentForm" action="{{route('sale')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="w-full py-6 flex items-center justify-center bg-[#3c463f] mb-4 rounded-lg">
                             <input id="cash" type="text" name="cash" class="bg-[#3c463f] w-full text-5xl text-center text-white outline-none appearance-none bg-none">
@@ -237,35 +222,43 @@
                         </div>
                         <input type="hidden" name="sub_total" value="{{$subTotal}}">
                         <input type="hidden" name="tax" value="{{$tax}}">
-                        <input type="hidden" name="pay" value="{{$pay}}">
+                        <input id="payInput" type="hidden" name="pay" value="{{$pay}}">
                         <input type="hidden" name="ticket" value="{{$ticket}}">
                         <input type="hidden" name="customer" value="{{$customer}}">
-                        <button id="submit" type="submit" class="w-full py-2 rounded-xl text-lg text-white mb-4" disabled>Pay</button>
+                        <button id="submitButton" type="submit" class="w-full py-2 rounded-xl text-lg text-white mb-1" disabled>Pay</button>
                         <script>
                             $(document).ready(function() {
-                                var submit = document.getElementById('submit');
-                                submit.addEventListener('click', function() {
-                                    html2canvas(document.getElementById('contentToSave'), {
-                                        scale: 2 // Increase scale for better quality
-                                    }).then(function(canvas) {
-                                        var link = document.createElement('a');
-                                        link.href = canvas.toDataURL('image/jpeg');
-                                        link.download = 'receipt.jpg';
-                                        link.click();
-                                    });
-                                });
-                                var total = {{ $pay }}; // Example total value, replace with actual total
+                                var pay = {{$pay}};
+                                var new_total = pay;  // Initialize new_total with the initial pay value
                                 
-                                if(submit.disabled === true){
+                                // Handle discount selection
+                                $('#discount_select').on('change', function() {
+                                    var discount_type = $(this).val();
+                                    console.log(discount_type);
+                        
+                                    if (discount_type == 'senior_citizen' || discount_type == 'pwd') {
+                                        $('#discount').text('20%');
+                                        new_total = pay - (pay * 0.20);  // Update new_total value
+                                        $('#total').text(new_total);
+                                        $('#payInput').val(new_total)
+                                    } else {
+                                        new_total = pay;  // Reset to original pay if no discount is applied
+                                    }
+                                });
+                        
+                                // Handle calculator button clicks
+                                var submit = document.getElementById('submitButton');
+                        
+                                if (submit.disabled) {
                                     submit.classList.remove('bg-proceed');
                                     submit.classList.add('bg-gray-500');
                                 }
-                    
+                        
                                 document.querySelectorAll('.calc-btn').forEach(button => {
                                     button.addEventListener('click', () => {
                                         const value = button.getAttribute('data-val');
                                         var cash_disp = document.getElementById('cash');
-                    
+                        
                                         if (value === "del") {
                                             // Remove the last character from the input value
                                             cash_disp.value = cash_disp.value.slice(0, -1);
@@ -273,22 +266,25 @@
                                             // Concatenate the new value to the existing value of the input element
                                             cash_disp.value += value;
                                         }
-                    
+                        
                                         // Get the current value of the input field
                                         var cash = cash_disp.value;
                                         console.log(cash);
-                    
+                        
                                         if (cash === '') { // Check if cash input is empty
                                             submit.disabled = true; // Disable submit button
                                             submit.classList.remove('bg-main');
                                             submit.classList.add('bg-gray-500');
                                             return; // Exit function early if cash input is empty
                                         }
-                    
-                                        var cashVal = parseInt(cash);
+                        
+                                        var cashVal = parseInt(cash, 10);
                                         if (isNaN(cashVal)) {
                                             console.log("Please enter a valid number.");
-                                        } else if (cashVal < total) {
+                                            submit.disabled = true;
+                                            submit.classList.remove('bg-main');
+                                            submit.classList.add('bg-gray-500');
+                                        } else if (cashVal < new_total) {
                                             console.log("The entered cash is less than the total.");
                                             submit.classList.remove('bg-main');
                                             submit.classList.add('bg-gray-500');
@@ -301,17 +297,98 @@
                                         }
                                     });
                                 });
+
+                                $('#cash').on('keyup', function(){
+                                    cash_value = $(this).val()
+                                    console.log(cash_value)
+
+                                    var cash_amount = cash_value
+
+                                    if (cash === '') { // Check if cash input is empty
+                                        submit.disabled = true; // Disable submit button
+                                        submit.classList.remove('bg-main');
+                                        submit.classList.add('bg-gray-500');
+                                        return; // Exit function early if cash input is empty
+                                    }
+
+                                    var cashVal = parseInt(cash_amount, 10);
+                                        if (isNaN(cashVal)) {
+                                            console.log("Please enter a valid number.");
+                                            submit.disabled = true;
+                                            submit.classList.remove('bg-main');
+                                            submit.classList.add('bg-gray-500');
+                                        } else if (cashVal < new_total) {
+                                            console.log("The entered cash is less than the total.");
+                                            submit.classList.remove('bg-main');
+                                            submit.classList.add('bg-gray-500');
+                                            submit.disabled = true;
+                                        } else {
+                                            console.log("The entered cash is greater than or equal to the total.");
+                                            submit.disabled = false;
+                                            submit.classList.remove('bg-gray-500');
+                                            submit.classList.add('bg-main');
+                                        }
+                                })
                             });
                         </script>
-                        <div class="w-full flex gap-3">
+                        
+                        {{-- <div class="w-full flex gap-3">
                             <button type="button" onclick="printReceipt()" class="w-full bg-[#3d3d3d] text-white py-2 rounded-lg">Print receipt</button>
-                        </div>
+                        </div> --}}
                     </form>
+                    <p class="mt-5 text-center mb-5">Quick cash payment</p>
+                    <div class="w-full flex gap-3">
+                        <button onclick="setAmount(20)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 20.00</button>
+                        <button onclick="setAmount(50)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 50.00</button>
+                        <button onclick="setAmount(100)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 100.00</button>
+                        <button onclick="setAmount(200)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 200.00</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <script>
+        $(document).ready(function() {
+            var submit = document.getElementById('submitButton');
+            submit.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent the form from submitting immediately
+
+                // Show the success popup and coverup
+                document.getElementById('success_popup').classList.remove('hidden');
+                document.getElementById('coverup').classList.remove('hidden');
+
+                // Wait for 1 second before submitting the form
+                setTimeout(function() {
+                    document.getElementById('success_popup').classList.add('hidden');
+                    document.getElementById('coverup').classList.add('hidden');
+                    // Submit the form by selecting the form element and calling submit on it
+                    document.getElementById('paymentForm').submit();
+                }, 2000); // 1000 milliseconds = 1 second
+            });
+        });
+
+        // function setAmount(amount) {
+        // const cashInput = document.getElementById('cash');
+        // cashInput.value = amount;
+
+        // // Trigger the logic to enable or disable the submit button based on the new amount
+        // var submit = document.getElementById('submitButton');
+        // var total = {{ $pay }}; // Example total value, replace with actual total
+        // var cashVal = parseInt(cashInput.value);
+        
+        // if (isNaN(cashVal) || cashVal < total) {
+        //     console.log("The entered cash is less than the total.");
+        //     submit.disabled = true;
+        //     submit.classList.remove('bg-main');
+        //     submit.classList.add('bg-gray-500');
+        // } else {
+        //     console.log("The entered cash is greater than or equal to the total.");
+        //     submit.disabled = false;
+        //     submit.classList.remove('bg-gray-500');
+        //     submit.classList.add('bg-main');
+        // }
+    // }
+
         function printReceipt(){
             event.preventDefault(); // Prevent default form submission
             $('#receipt').removeClass('invisible')

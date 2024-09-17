@@ -81,7 +81,7 @@
                     </div>
                     <div class="w-full flex py-2">
                         <div class="w-[70%] flex flex-col gap-2">
-                            <p class="w-full">Name</p>
+                            <p class="w-full" id="product_name">Name</p>
                             <p class="w-full font-medium" id="name_input"></p>
                         </div>
                         <div class="w-[30%] flex flex-col gap-2">
@@ -92,24 +92,21 @@
                 </div>
             </div>
             <div class="w-full col-start-2 row-span-2 bg-white rounded-xl py-3 px-5">
-                <p class="py-1 font-medium border-b-2 border-[#565857] text-[#565857]">Current orders</p>
-                <div class="w-full pt-2">
-                    @foreach ($orders as $order)
-                        <div class="w-full flex items-center text-sm py-1 border-b">
-                            <p class="w-[30%]">{{ $order->item }}</p>
-                            <p class="w-[27%]">{{ $order->supplier }}</p>
-                            <p class="w-[8%]">{{ $order->quantity }}</p>
-                            @php
-                                $status = $order->status;
-                                if($status == "Pending"){
-                                    echo '<p class="w-[18%] mr-4 text-center px-2 py-1 rounded-full bg-red-500 text-white text-xs">Pending</p>';
-                                } elseif($status == "Delivered"){
-                                    echo '<p class="w-[18%] mr-4 text-center px-2 py-1 rounded-full bg-green-500 text-white text-xs">Delivered</p>';
-                                }
-                            @endphp
-                            <p class="w-[15%] text-right">{{ \Carbon\Carbon::parse($order->created_at)->format('F d, Y \- h:i a') }}</p>
+                <div class="flex justify-between border-b-2 border-[#565857]">
+                    <p class="py-1 font-medium text-[#565857]">Batch Order # {{$newBn}}</p>
+                    <form action="{{route('office.place_order')}}" method="POST">
+                        @csrf
+                        <div id="form_div">
+
                         </div>
-                    @endforeach
+                        <input type="hidden" name="batch_number" value="{{$newBn}}">
+                        <button class="text-main">
+                            Complete this order
+                        </button>
+                    </form>
+                </div>
+                <div class="w-full pt-2" id="res_div">
+                    
                 </div>
             </div>
             <div class="w-full bg-white rounded-xl py-3 px-5">
@@ -121,30 +118,34 @@
 
                     </div>
                     <div class="w-full flex gap-1 pt-3">
-                        <p>Selected supplier:</p>
+                        <p id="selected supplier">Selected supplier:</p>
                         <p class="font-medium" id="supplier_input">Supplier</p>
                     </div>
                 </div>
-                <form action="{{route('office.place_order')}}" method="POST">
-                    @csrf
+                {{-- <form action="" method="POST"> --}}
+                    {{-- @csrf --}}
                     <input id="item_name_submit" type="hidden" name="item_name" value="">
                     <input id="supplier_name_submit" type="hidden" name="supplier_name" value="">
                     <input id="item_quantity_submit" type="hidden" name="item_quantity" value="">
-                    <button id="confirm" type="submit" class="w-full py-2 rounded-lg border-2 border-main text-main">Confirm Order</button>
-                </form>
+                    {{-- <input id="batch_number" type="hidden" name="batch_number" value="{{$newBn}}"> --}}
+                    <button id="add_to_order" type="submit" class="w-full py-2 rounded-lg border-2 border-main text-main">Confirm Order</button>
+                {{-- </form> --}}
             </div>
         </div>
     </div>
     <script>
         $(document).ready(function(){
+            var food_name = ''
+            var supplier_name = ''
             var itemQuantity = 0
             $('#quantity').on('keyup', function(){
-                var itemQuantity = $(this).val()
+                itemQuantity = $(this).val()
                 $('#item_quantity_submit').val(itemQuantity)
             })
 
             $('#item_search').on('keyup', function(){
                 var item_key = $(this).val()
+                product_name = $(this).val()
                 // console.log(key)
                 var item_url = "{{ route('office.item_search', ['key' => ':key']) }}"
                 item_url = item_url.replace(':key', item_key)
@@ -170,6 +171,7 @@
                             let foodName = $(this).data('food-name');
 
                             if (foodName) {
+                                food_name = foodName
                                 $('#name_input').text(foodName);
                                 $('#item_name_submit').val(foodName)
                             } else {
@@ -185,6 +187,7 @@
 
             $('#supplier_search').on('keyup', function(){
                 var supplier_key = $(this).val()
+                
                 // console.log(key)
                 var supplier_url = "{{ route('office.supplier_search', ['key' => ':key']) }}"
                 supplier_url = supplier_url.replace(':key', supplier_key)
@@ -211,6 +214,7 @@
                             let supplierName = $(this).data('supplier-name');
 
                             if (supplierName) {
+                                supplier_name = supplierName
                                 $('#supplier_input').text(supplierName);
                                 $('#supplier_name_submit').val(supplierName)
                             } else {
@@ -223,6 +227,31 @@
                     }
                 });
             })
+            $('#add_to_order').on('click', function() {
+                console.log('Product Name:', food_name);
+                console.log('Supplier:', supplier_name);
+                console.log('Quantity:', itemQuantity);
+                // Add your logic here to handle the order
+
+                var results = $('#res_div')
+                var formDiv = $('#form_div')
+
+                results.append(`
+                    <div class="w-full flex items-center text-sm py-1 border-b">
+                        <p class="w-2/5" id="item_res">${food_name}</p>
+                        <p class="w-2/5" id="item_supplier">${supplier_name}</p>
+                        <p class="w-1/5" id="item_quantity">${itemQuantity}</p>
+                    </div> 
+                `)
+
+                formDiv.append(`
+                    <div>
+                        <input type="hidden" name="food_name[]" value="${food_name}">
+                        <input type="hidden" name="suppliername[]" value="${supplier_name}">
+                        <input type="hidden" name="quantity[]" value="${itemQuantity}">
+                    </div> 
+                `)
+            });
         })
 
 

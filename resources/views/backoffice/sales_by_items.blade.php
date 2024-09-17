@@ -76,17 +76,28 @@
             <div class="w-full">
                 <div class="mb-10">
                     <div class="w-full bg-white p-6 flex gap-2">
-                        <div class="w-1/5 border-r-2 pr-2">
-                            <p id="item" class="mb-5 font-semibold">Top 10 Items for the month of <span id="month">July</span></p>
+                        <div class="w-1/2 border-r-2 pr-2">
+                            <p id="item" class="mb-5 font-semibold">Top 10 most sold items for the month of <span id="month">July</span></p>
                             <div class="w-full flex flex-col gap-2 items-start">
                               @foreach ($topItems as $topItem)
-                                  <button id="items"  data-val="{{$topItem->food_name}}" class="w-full py-1 text-start">{{$topItem->food_name}}</button>
+                                  <button id="items"  data-val="{{$topItem->food_name}}" class="w-full py-1 text-start border-b">{{$topItem->food_name}}</button>
                               @endforeach
                             </div>
                         </div>
-                        <div class="w-4/5">
-                            <canvas id="myChart" class="w-full"></canvas>
+                        <div class="w-1/2 px-5">
+                            {{-- <canvas id="myChart" class="w-full"></canvas> --}}
+                            <p id="item" class="mb-5 font-semibold">Top 10 least sold items for the month of <span id="month">July</span></p>
+                            <div class="w-full flex flex-col gap-2 items-start">
+                              @foreach ($leastItems as $leastItem)
+                                  <button id="items"  data-val="{{$leastItem->food_name}}" class="w-full py-1 text-start border-b">{{$leastItem->food_name}}</button>
+                              @endforeach
+                            </div>
                         </div>
+                    </div>
+                </div>
+                <div class="mb-10">
+                    <div class="w-full bg-white p-6 flex gap-2">
+                        <canvas id="myChart" class="w-full"></canvas>
                     </div>
                 </div>
                 <div class="w-full p-6 bg-white mb-10">
@@ -176,6 +187,7 @@
     url: url,
     method: "GET",
     success: function(response) {
+        console.log(response);
         $('#month').textContent = response.month;
         // Extract labels (dates) and data (counts) from the response
         var labels = Object.keys(response.summed_counts);
@@ -197,7 +209,7 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Item sold on this day', // Provide a label for the dataset
+                    label: buttonValue + 'Item sold on this day', // Provide a label for the dataset
                     data: data,
                     borderWidth: 1
                 }]

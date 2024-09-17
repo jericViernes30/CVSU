@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://kit.fontawesome.com/5bf9be4e76.js" crossorigin="anonymous"></script>
-    <script src="{{ asset('jquery/jquery.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     @vite('resources/css/app.css')
     <title>Back Office</title>
 </head>
-<body class="w-full h-screen bg-[#fefefe] relative">
+<body class="w-full h-screen bg-[#fefefe] items-list">
     <div id="coverup" class="hidden w-full bg-main h-screen absolute z-50 opacity-30"></div>
     <form id="filterForm">
         <div id="filterModal" class="hidden py-1 w-1/3 bg-[#f0f0f0] shadow-3xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 rounded-2xl">
@@ -71,8 +71,8 @@
             </div>
         </div>
     </form>
-    <div class="w-full flex items-center h-[7%] bg-[#db121c] px-10">
-        <p class="text-lg text-white">Stocks Adjustment</p>
+    <div class="w-full flex items-center h-[7%] bg-main px-10">
+        <p class="text-lg text-white">Pending Items</p>
     </div>
     <div class="w-full h-[93%] flex z-0">
         <div class="w-[5%] pt-10 bg-[#fefefe]">
@@ -92,13 +92,13 @@
                 </div>
             </div>
             <div class="w-full relative">
-                <a href="{{route('office.items_list')}}" class="w-full flex items-center justify-center h-auto py-4">
-                    <img src="{{asset('images/prod-new.png')}}" alt="" class="w-[30px] h-auto">
+                <a href="{{route('office.items_list')}}" class="w-full flex items-center justify-center h-auto py-4 bg-[#f5a7a4]">
+                    <img src="{{asset('images/prod-red.png')}}" alt="" class="w-[30px] h-auto">
                 </a>
             </div>
             <div class="w-full relative">
-                <button onclick="openInventoryOptions()" class="w-full flex items-center justify-center h-auto py-4 bg-[#f5a7a4]">
-                    <img src="{{asset('images/inv-red.png')}}" alt="" class="w-[30px] h-auto">
+                <button onclick="openInventoryOptions()" class="w-full flex items-center justify-center h-auto py-4">
+                    <img src="{{asset('images/inv-new.png')}}" alt="" class="w-[30px] h-auto">
                 </button>
                 <div id="inventory_options" class="hidden w-[200px] absolute left-20 top-0 z-10 bg-slate-50 p-3 text-sm">
                     <div class="w-full flex flex-col gap-3">
@@ -133,71 +133,85 @@
                 </a>
             </div>
         </div>
-        <div class="w-[95%] bg-[#f2f2f2] z-0 p-7">
-            <div class="w-full bg-slate-50 shadow-md p-6">
-                <div class="w-full flex gap-4 px-5">
-                    <button onclick="openFilter()" class="px-10 py-2 rounded-lg text-center bg-main text-white">Advance filter</button>
+        <div id="main" class="w-[95%] bg-[#f2f2f2] z-0 p-7">
+            <div class="w-full h-[650px] overflow-y-auto bg-[#fefefe] shadow-md py-6 rounded-xl">
+                <div class="w-full flex items-center bg-slate-300 py-4 px-6">
+                    <p class="w-[30%]">Item name</p>
+                    <p class="w-[10%]">Category</p>
+                    <p class="w-[20%]">Supplier</p>
+                    <p class="w-[10%]">Product unit</p>
+                    <p class="w-[5%]">Cost</p>
+                    <p class="w-[5%]">Retail</p>
+                    <p class="w-[10%]">Date created</p>
+                    <p class="w-[10%]"></p>
                 </div>
-                <div class="w-full flex items-center text-sm py-4 px-5 text-gray-500 border-b border-[#dadada] text-left">
-                    <p class="w-[45%]">Item</p>
-                    <p class="w-[10%]">In Stock</p>
-                    <p class="w-[15%]">Status</p>
-                    <p class="w-[15%]">Recent adjustment</p>
-                    <p class="w-[15%]"></p>
-                </div>
-                <div id="filteredItems" class="w-full">
-                    @foreach ($item as $i)
-                    @php
-                        $quantity = $i->quantity;
-                        $cost = $i->cost * $quantity;
-                        $retail = $i->retail * $quantity;
-                        $profit = $retail - $cost;
-                    @endphp
-                        <div class="w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada] text-left">
-                            <p class="w-[45%]" id="item_res">{{$i->item}}</p>
-                            <p class="w-[10%]" id="quantity_res">{{$i->quantity}}</p>
-                            @php
-                                if($i->category != 'Limited Edition' && $quantity >= 100){
-                                    echo '<p class="w-[15%] text-green-500 font-medium">High amount</p>';
-                                } elseif($i->category != 'Limited Edition' && $quantity >= 50){
-                                    echo '<p class="w-[15%] text-blue-500 font-medium">Good amount</p>';
-                                } elseif($i->category != 'Limited Edition' && $quantity >= 20){
-                                    echo '<p class="w-[15%] text-orange-500 font-medium">Low amount</p>';
-                                } elseif($i->category != 'Limited Edition' && $quantity >= 1){
-                                    echo '<p class="w-[15%] text-red-500 font-medium">Critically low amount</p>';
-                                } elseif($i->category != 'Limited Edition' && $quantity == 0){
-                                    echo '<p class="w-[15%] text-red-500 font-medium">Items sold</p>';
-                                } elseif($i->category == 'Limited Edition' && $quantity == 0){
-                                    echo '<p class="w-[15%] text-red-500 font-medium">Items sold</p>';
-                                } elseif($i->category == 'Limited Edition'){
-                                    echo '<p class="w-[15%] text-[#FFD700] font-medium">Limited Edition</p>';
-                                }
-                            @endphp
-                            </p>
-                            <p class="w-[15%]">{{$i->update_reason}}</p>
-                            <a href="{{route('office.adjust', ['item_name' => $i->item])}}" class="w-[15%] flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z"/></svg>
-                            </a>
-                        </div>
-                    @endforeach
-                </div>
-                
-                <!-- Pagination links -->
-                
-
-                <!-- Your existing pagination UI -->
-                <div class="w-full flex items-center gap-10 pt-2 px-6 text-sm text-gray-500">
-                    {{ $item->links() }}
-                    <div class="flex items-center gap-1 w-[8%]">
-                        <p>Page: {{ $item->currentPage() }}</p>
-                        <p>of {{ $item->lastPage() }}</p>
+                @foreach ($items as $item)
+                <div class="w-full flex items-center py-4 border-b px-6">
+                    <p class="w-[30%]">{{ $item->item }}</p>
+                    <p class="w-[10%]">{{ $item->category }}</p>
+                    <p class="w-[20%]">{{ $item->supplier }}</p>
+                    <p class="w-[10%]">Per {{ $item->product_unit }}</p>
+                    <p class="w-[5%]">{{ $item->cost }}</p>
+                    <p class="w-[5%]">{{ $item->retail }}</p>
+                    <p class="w-[15%]">{{ $item->created_at }}</p>
+                    <div class="w-[5%] flex items-center gap-2">
+                        <a href="/back-office/accept-item/{{$item->id}}" class="w-1/2">
+                            <img src="{{asset('images/check.png')}}" alt="" class="w-[70%]">
+                        </a>
+                        <a href="#" class="w-1/2">
+                            <img src="{{asset('images/delete1.png')}}" alt="" class="w-[70%]">
+                        </a>
                     </div>
                 </div>
+                @endforeach
             </div>
         </div>
     </div>
     <script>
+        var main = document.getElementById('main')
+
         $(document).ready(function() {
+            $('#item_search').on('keyup', function(){
+            var key = $(this).val();
+            var url = '{{route("office.item_list_search", ["key" => ":key"])}}';
+            url = url.replace(':key', key);
+            // console.log(url)
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(data) {
+                        // Assuming the response structure is like: { menus: [...] }
+                        var menus = data.menus;
+
+                        // Clear the existing content
+                        $('#displayDiv').empty();
+
+                        // Loop through the returned menus array and generate HTML
+                        menus.forEach(function(menu) {
+                            var itemList = `
+                                <a href="/back-office/view_item/${menu.id}">
+                                    <div class='w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada]'>
+                                        <p class='w-[40%]'>${menu.item}</p>
+                                        <p class='w-[20%]'>${menu.category}</p>
+                                        <p class='w-[10%]'>${menu.quantity}</p>
+                                        <p class='w-[10%]'>&#8369;${menu.cost}</p>
+                                        <p class='w-[10%]'>&#8369;${menu.retail}</p>
+                                    </div>
+                                </a>
+                            `;
+
+                            $('#displayDiv').append(itemList);
+                        });
+                    },
+                    error: function(){
+
+                    }
+                })
+            })
+        });
+
+        $(document).ready(function(){
             $('#applyFilterButton').click(function() {
                 $.ajax({
                     url: "{{ route('office.filter_items') }}",
@@ -205,35 +219,20 @@
                     data: $('#filterForm').serialize(),
                     success: function(data) {
                         // console.log(data);
-                        $('#filteredItems').empty();
+                        $('#displayDiv').empty();
                         if (data.length > 0) {
                             $.each(data, function(index, item) {
-                                let quantityStatus = '';
-                                if (item.quantity >= 100) {
-                                    quantityStatus = '<p class="w-[15%] text-green-500 font-medium">High amount</p>';
-                                } else if (item.quantity >= 50) {
-                                    quantityStatus = '<p class="w-[15%] text-blue-500 font-medium">Good amount</p>';
-                                } else if (item.quantity >= 20) {
-                                    quantityStatus = '<p class="w-[15%] text-orange-500 font-medium">Low amount</p>';
-                                } else if (item.quantity >= 1) {
-                                    quantityStatus = '<p class="w-[15%] text-red-500 font-medium">Critically low amount</p>';
-                                } else {
-                                    quantityStatus = '<p class="w-[15%] text-red-500 font-medium">No stocks</p>';
-                                }
-
-                                let itemRow = `
-                                    <div class="w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada] text-left">
-                                        <p class="w-[45%]" id="item_res">${item.item}</p>
-                                        <p class="w-[10%]" id="quantity_res">${item.quantity}</p>
-                                        ${quantityStatus}
-                                        <p class="w-[15%]">${item.update_reason}</p>
-                                        <a href="/back-office/stocks_adjustments/${item.item}" class="w-[15%] flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="15" height="15">
-                                                <path d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z"/>
-                                            </svg>
-                                        </a>
-                                    </div>`;
-                                $('#filteredItems').append(itemRow);
+                                let itemRow = 
+                                `<a href="/back-office/view_item/${item.id}">
+                                    <div class='w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada]'>
+                                        <p class='w-[40%]'>${item.item}</p>
+                                        <p class='w-[20%]'>${item.category}</p>
+                                        <p class='w-[10%]'>${item.quantity}</p>
+                                        <p class='w-[10%]'>&#8369;${item.cost}</p>
+                                        <p class='w-[10%]'>&#8369;${item.retail}</p>
+                                    </div>
+                                </a>`;
+                                $('#displayDiv').append(itemRow);
                             });
                         } else {
                             $('#filteredItems').append('<p>No items found</p>');
@@ -244,19 +243,25 @@
                     }
                 });
             });
-        });
-
+        })
 
         function openInventoryOptions(){
             var inventoryOptions = document.getElementById('inventory_options')
             inventoryOptions.classList.toggle('hidden')
+            main.classList.toggle('blur-5px')
         }
 
         function openDashboard(){
             var inventoryOptions = document.getElementById('dash_options')
             inventoryOptions.classList.toggle('hidden')
+            main.classList.toggle('blur-5px')
         }
 
+        function openItems(){
+            var inventoryOptions = document.getElementById('items_options')
+            inventoryOptions.classList.toggle('hidden')
+            main.classList.toggle('blur-5px')
+        }
 
         function openFilter(){
             var cover = document.getElementById('coverup')

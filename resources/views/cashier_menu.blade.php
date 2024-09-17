@@ -62,8 +62,91 @@
             </a>
         </div>
         {{-- POS --}}
-        <div class="w-[94%] grid grid-cols-3 grid-rows-12 bg-[#e5e5e5] p-4 gap-6">
-            <div class="w-full col-span-3 row-span-2 bg-white rounded-xl px-5 py-3">
+        <div class="w-[94%] flex flex-col bg-[#e5e5e5] p-4 gap-6">
+            <div class="w-full flex justify-end items-center py-3 gap-3">
+                <div class="w-1/3 flex gap-2 justify-end">
+                    <p class="text-[#747171]">Shift opened:</p>
+                    <p class="font-semibold">{{ $time }}</p>
+                </div>
+                <div class="w-1/4 flex gap-10 items-center justify-end">
+                    <form action="{{ route('end-shift') }}" method="POST" class="w-full">
+                        @csrf
+                        <button class="w-full py-2 border-2 border-main rounded-lg text-main hover:bg-main hover:text-white ease-in-out duration-100">End shift</button>
+                    </form>
+                    <a class="px-10 text-main underline" href="{{route('welcome')}}">Break</a>
+                </div>
+            </div>
+            <div class="w-full flex gap-2">
+                <div class="w-[60%] shadow-xl bg-[#f5f5f5] rounded-xl p-4">
+                    <p class="mb-2 font-semibold">Cash drawer details</p>
+                    <div class="w-full flex gap-2 justify-evenly items-center mb-5">
+                        <div class="w-[28%] rounded-lg shadow-lg py-8 bg-[#e5e5e5] border">
+                            <div class="flex flex-col gap-5">
+                                <p class="text-center text-5xl font-bold">&#8369;{{$shift->starting_cash}}</p>
+                                <p class="text-center text-lg">Starting Cash</p>
+                            </div>
+                        </div>
+                        <div class="w-[28%] py-8 rounded-lg shadow-lg bg-[#e5e5e5] border">
+                            <div class="flex flex-col gap-5">
+                                <p class="text-center text-5xl font-bold">&#8369;{{$shift->cash_in ?? 0}}</p>
+                                <p class="text-center text-lg">Total Pay Ins</p>
+                            </div>
+                        </div>
+                        <div class="w-[28%] py-8 rounded-lg shadow-lg bg-[#e5e5e5] border">
+                            <div class="flex flex-col gap-5">
+                                <p class="text-center text-5xl font-bold">&#8369;{{$cashInPayments - $cashOutPayments ?? 0}}</p>
+                                <p class="text-center text-lg">GCash Payments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full flex gap-2 justify-evenly items-center mb-5">
+                        <div class="w-[28%] rounded-lg shadow-lg py-8 bg-[#e5e5e5] border">
+                            <div class="flex flex-col gap-5">
+                                <p class="text-center text-5xl font-bold">&#8369;{{$cash ?? 0}}</p>
+                                <p class="text-center text-lg">Cash Payments</p>
+                            </div>
+                        </div>
+                        <div class="w-[28%] rounded-lg shadow-lg py-8 bg-[#e5e5e5] border">
+                            <div class="flex flex-col gap-5">
+                                <p class="text-center text-5xl font-bold">&#8369;{{$shift->cash_out ?? 0}}</p>
+                                <p class="text-center text-lg">Total Petty Cash</p>
+                            </div>
+                        </div>
+                        <div class="w-[28%] rounded-lg shadow-lg py-8 bg-[#e5e5e5] border">
+                            <div class="flex flex-col gap-5">
+                                <p class="text-center text-5xl font-bold">&#8369;{{$cashOutCharge + $cashInCharge ?? 0}}</p>
+                                <p class="text-center text-lg">GCash Charges</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-[40%] py-10 block mx-auto">
+                        <div>
+                            <p class="text-center text-5xl font-bold mb-2 text-main">&#8369;{{((($shift->closing_cash + $shift->cash_in) - $cashOutPayments) - $shift->cash_out) + $shift->starting_cash + $cashInCharge + $cashOutCharge}}.00</p>
+                            <p class="text-center text-lg">Expected Cash</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="parent" class="w-[40%] shadow-xl bg-[#f5f5f5] rounded-xl h-[623px] flex flex-col">
+                    <p class="font-semibold p-4">Today's transactions</p>
+                    <div class="w-full flex py-2 bg-[#bebebe] px-4">
+                        <p class="font-medium w-1/4">Time</p>
+                        <p class="font-medium w-1/4 text-center">Sale #</p>
+                        <p class="font-medium w-1/4 text-center">Type</p>
+                        <p class="font-medium w-1/4 text-right">Total</p>
+                    </div>
+                    <div id="child" class="w-full h-fit flex-1 overflow-y-auto rounded-bl-xl rounded-br-xl">
+                        @foreach ($sales as $sale)
+                            <div class="w-full flex py-2 border-b px-4">
+                                <p class="w-1/4">{{ \Carbon\Carbon::parse($sale->created_at)->format('h:i a') }}</p>
+                                <p class="w-1/4 text-center">{{ $sale->ticket }}</p>
+                                <p class="w-1/4 text-center">{{ $sale->type }}</p>
+                                <p class="w-1/4 text-right">&#8369; {{ $sale->total }}.00</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            {{-- <div class="w-full col-span-3 row-span-2 bg-white rounded-xl px-5 py-3">
                 <div class="w-full flex items-center h-full">
                     <div class="w-1/4 flex gap-5">
                         <p class="font-semibold">Terminal #:</p>
@@ -179,7 +262,8 @@
                         <button type="submit" class="w-full border border-main rounded-lg py-1 text-red hover:bg-main hover:text-white ease-in-out duration-100">Pay</button>
                     </form>
                 </div>
-            </div>
+            </div> --}}
+
             {{-- <div class="w-1/3 bg-[#fefefe] py-4 h-fit">
                 <div class="w-full flex gap-2 items-center justify-evenly py-2 px-4 mb-2">
                     <button onclick="openCashManagement()" class="w-1/2 py-2 border-2 border-main rounded-sm text-main">Cash management</button>

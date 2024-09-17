@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{{ asset('jquery/jquery.js') }}"></script>
     <script src="https://kit.fontawesome.com/5bf9be4e76.js" crossorigin="anonymous"></script>
     @vite('resources/css/app.css')
     <title>Back Office</title>
@@ -89,12 +89,18 @@
                 </a>
             </div>
         </div>
-        <div id="main" class="w-[95%] bg-[#f2f2f2] z-0 p-7">
-            <div class="w-1/3 bg-slate-50 shadow-md p-6 rounded-xl">
+        <div id="main" class="w-[95%] flex justify-evenly gap-3 bg-[#f2f2f2] z-0 p-7">
+            <div class="w-1/2 bg-slate-50 shadow-md p-6 rounded-xl">
                 <div class="w-full pb-1 flex gap-4 items-center justify-start">
                     <button onclick="openAddCashier()" class="px-5 bg-main font-medium text-white text-sm rounded-lg py-2">Add Cashier</button>
                     {{-- <button class="font-medium bg-gray-600 uppercase py-2 text-white w-[100px] mb-2 rounded-sm text-xs">Export</button> --}}
                 </div>
+                <p class="text-center font-medium mb-4 text-lg">Cashier's List</p>
+                @if (session('success'))
+                    <div class="w-full block mx-auto">
+                        <p class="text-green-500 font-semibold text-center">{{ session('success') }}</p>
+                    </div>
+                @endif
                 <div class="w-full flex items-center text-sm py-4 px-5 text-gray-500 border-b border-[#dadada]">
                     <p class="w-[50%]">Cashier name</p>
                     <p class="w-[50%]">Created at</p>
@@ -103,14 +109,40 @@
                     @foreach ($cashiers as $cashier)
                         <div class="w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada]">
                             <p class="w-[50%]">{{$cashier->name}}</p>
-                            <p class="w-[50%]">
+                            <p class="w-[35%]">
                                 {{
                                     $date = $cashier->created_at->format('F j, Y - g:i A');
                                 }}
                             </p>
+                            <a href="/back-office/remove-cashier/{{$cashier->id}}" class="w-[15%] text-main">Remove</a>
                         </div>
                     @endforeach
                 </div>
+            </div>
+            <div class="w-1/2 bg-slate-50 shadow-md p-6 rounded-xl">
+                <p class="text-center font-medium mb-4 text-lg">Pending Accounts List</p>
+                <div class="w-full flex items-center text-sm py-4 px-5 text-gray-500 border-b border-[#dadada]">
+                    <p class="w-[45%]">Cashier name</p>
+                    <p class="w-[35%]">Created at</p>
+                    <p class="w-[20%]"></p>
+                </div>
+                @forelse ($pendings as $pending)
+                    <div class="w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada]">
+                        <p class="w-[45%]">{{ $pending->name }}</p>
+                        <p class="w-[35%]">
+                            {{
+                                $date = $pending->created_at->format('F j, Y - g:i A');
+                            }}
+                        </p>
+                        <div class="w-[20%] flex justify-between">
+                            <a href="{{ route('office.accept', ['name' => $pending->name]) }}" class="text-green-500">Accept</a>
+                            <a href="#" class="text-main">Reject</a>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-gray-500">No pending accounts found.</p>
+                @endforelse
+
             </div>
         </div>
     </div>

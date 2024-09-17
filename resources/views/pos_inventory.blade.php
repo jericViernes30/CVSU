@@ -52,6 +52,7 @@
         <div class="w-[94%] flex p-6 bg-[#e5e5e5]">
             <div class="w-full bg-slate-50 shadow-md rounded-xl p-6">
                 <input id="item_search" type="search" placeholder="Search for item" name="item" class="w-[400px] px-5 py-2 rounded-lg outline-none border border-[#565857] focus:border-main">
+                <button onclick="window.location.href='{{route('add_item')}}'" class="px-5 bg-[#4d4d4d] font-medium uppercase text-xs py-2 text-white rounded-md">Add Item</button>
                 <div class="w-full flex items-center text-sm py-4 px-5 text-gray-500 border-b border-[#dadada] text-left">
                     <p class="w-[40%]">Item</p>
                     <p class="w-[10%] text-right">In Stock</p>
@@ -68,21 +69,25 @@
                             <p class='w-[40%]'>{{$i->item}}</p>
                             <p class='w-[10%] text-right'>{{$i->quantity}}</p>
                             @php
-                                if($quantity >= 100){
+                                if($i->category != 'Limited Edition' && $quantity >= 100){
                                     echo '<p class="w-[15%] text-green-500 font-medium text-right">High amount</p>';
-                                } elseif($quantity >= 50){
+                                } elseif($i->category != 'Limited Edition' && $quantity >= 50){
                                     echo '<p class="w-[15%] text-blue-500 font-medium text-right">Good amount</p>';
-                                } elseif($quantity >= 20){
+                                } elseif($i->category != 'Limited Edition' && $quantity >= 20){
                                     echo '<p class="w-[15%] text-orange-500 font-medium text-right">Low amount</p>';
-                                } elseif($quantity >= 1){
+                                } elseif($i->category != 'Limited Edition' && $quantity >= 1){
                                     echo '<p class="w-[15%] text-red-500 font-medium text-right">Critically low amount</p>';
-                                } elseif($quantity == 0){
-                                    echo '<p class="w-[15%] text-red-500 font-medium text-right">No stocks</p>';
+                                } elseif($i->category != 'Limited Edition' && $quantity == 0){
+                                    echo '<p class="w-[15%] text-red-500 font-medium text-right">Items sold</p>';
+                                } elseif($i->category == 'Limited Edition' && $quantity == 0){
+                                    echo '<p class="w-[15%] text-red-500 font-medium text-right">Items sold</p>';
+                                } elseif($i->category == 'Limited Edition'){
+                                    echo '<p class="w-[15%] text-[#FFD700] font-medium text-right">Limited Edition</p>';
                                 }
                             @endphp
                             </p>
                             <p class='w-[15%] text-right'>{{ \Carbon\Carbon::parse($i->updated_at)->format('F j, Y - g:i A') }}</p>
-                            <p class='w-[20%] text-right'>{{$i->update_reason}}</p>
+                            <p class='w-[20%] text-right'>{{$i->update_reason ?? 'None'}}</p>
                         </div>
                     @endforeach
                 </div>
@@ -140,10 +145,10 @@
                 var itemList = `
                 <div class='w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada] text-left'>
                     <p class='w-[40%]'>${menu.item}</p>
-                    <p class='w-[10%]'>${menu.quantity}</p>
-                    <p class='w-[15%] ${quantityClass}'>${quantityText}</p>
-                    <p class='w-[15%]'>${new Date(menu.updated_at).toLocaleString()}</p>
-                    <p class='w-[15%]'>${menu.update_reason}</p>
+                    <p class='w-[10%] text-right'>${menu.quantity}</p>
+                    <p class='w-[15%] ${quantityClass} text-right'>${quantityText}</p>
+                    <p class='w-[15%] text-right'>${new Date(menu.updated_at).toLocaleString()}</p>
+                    <p class='w-[20%] text-right'>${menu.update_reason}</p>
                 </div>
                 `;
                 itemDiv.append(itemList);

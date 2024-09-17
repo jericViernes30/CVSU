@@ -13,7 +13,7 @@
         <button onclick="shet()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512" height="20" width="20"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>
         </button>
-        <p class="text-3xl text-center font-medium pt-7">&#8369;<span id="total_amount">0</span>.00</p>
+        <p class="text-3xl text-center font-medium pt-7">&#8369;<span id="total_amount">0</span></p>
         <p class="text-sm text-center text-gray-500 border-b border-[#bebebe] pb-3">Total</p>
         <p class="px-2 text-sm pt-3 pb-1">Employee: <span id="employee_name">Employee</span></p>
         <p class="px-2 text-sm pt-1 pb-3 border-b border-[#bebebe]">Ticket #: <span id="ticket_number">1-1016</span></p>
@@ -24,11 +24,11 @@
         </div>
         <div class="w-full px-2 flex items-center justify-between pt-3 pb-1 text-sm">
             <p>Cash</p>
-            <p>&#8369;<span id="cash_amount">100</span>.00</p>
+            <p>&#8369;<span id="cash_amount">100</span></p>
         </div>
         <div class="w-full px-2 flex items-center justify-between pt-1 pb-3 text-sm border-b border-[#bebebe]">
             <p>Change</p>
-            <p>&#8369;<span id="change_amount">50</span>.00</p>
+            <p>&#8369;<span id="change_amount">50</span></p>
         </div>
         <div class="w-full px-2 flex items-center pt-2 justify-end text-sm text-gray-500">
             <p id="sale_time">5/8/24 10:49 AM</p>
@@ -131,7 +131,7 @@
                             <p class="w-[15%]">{{ $sale->cashier }}</p>
                             <p class="w-[20%]">{{ $sale->customer }}</p>
                             <p class="w-[10%]">{{ $sale->type }}</p>
-                            <p class="w-[15%]">&#8369; {{ $sale->total }}.00</p>
+                            <p class="w-[15%]">&#8369; {{ $sale->total }}</p>
                             <div class="w-[5%]">
                                 <button onclick="view({{ $sale->ticket }})" class="w-full py-1 bg-main rounded-md block mx-auto text-white text-sm">
                                     View
