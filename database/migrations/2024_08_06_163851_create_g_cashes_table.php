@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('g_cashes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('contact_person');
-            $table->string('contact_number');
-            $table->string('address');
+            $table->string('transaction_number');
+            $table->string('type');
+            $table->string('amount');
+            $table->string('charge');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('g_cashes');
     }
 };

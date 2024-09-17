@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('supplier_orders', function (Blueprint $table) {
             $table->id();
             $table->string('item');
+            $table->string('batch_number');
             $table->string('quantity');
             $table->string('supplier');
             $table->string('status');
+            $table->string('expiration_date')->nullable();
             $table->timestamps();
         });
     }

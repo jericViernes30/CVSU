@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stocks', function (Blueprint $table) {
+        Schema::create('pending_items', function (Blueprint $table) {
             $table->id();
             $table->string('item');
             $table->string('category');
@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('quantity');
             $table->float('cost');
             $table->float('retail');
-            $table->string('update_reason')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stocks');
+        Schema::dropIfExists('pending_items');
     }
 };
