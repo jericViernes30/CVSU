@@ -258,30 +258,45 @@
                     alert('Please enter a valid quantity');
                 }
             });
+
+            $(document).on('keydown', function(event){
+                if(event.key === ' '){
+                    event.preventDefault()
+                    keepFocus()
+                }
+            })
     
             // Listen for the barcode input
             barcodeInput.on('keypress', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
+                    alert('Enter Key is pressed!')
+                    // Check if the #barcode input is not focused
+                    if (!barcodeInput.is(':focus')) {
+                        keepFocus(); // Ensure the input field stays focused
+                        console.log('Barcode not focused')
+                    }
+
                     let barcodeValue = barcodeInput.val().trim();
-    
+
                     if (itemsData[barcodeValue]) {
                         let orderItem = itemsData[barcodeValue];
                         for (let i = 0; i < currentQuantity; i++) {
                             addToOrders(orderItem.item, orderItem.price);
                         }
-    
+
                         updateOrdersDisplay();
                         currentQuantity = 1;  // Reset the quantity to 1
                         quantityInput.val(1);  // Reset the quantity input to 1
                     } else {
                         console.log('Item not found for barcode:', barcodeValue);
                     }
-    
+
                     barcodeInput.val(''); // Clear the input field for the next scan
                     keepFocus(); // Ensure the input field stays focused
                 }
             });
+
     
             // Toggle quantity input on specific key press (e.g., `)
             $(document).on('keydown', function(event) {
@@ -293,8 +308,8 @@
 
             $(document).on('keydown', function(event) {
                 if (event.key === 'End') {
-                    moneyTrans.classList.remove('hidden')
-                    coverup.classList.remove('hidden')
+                    moneyTrans.classList.toggle('hidden')
+                    coverup.classList.toggle('hidden')
                 }
             });
     
