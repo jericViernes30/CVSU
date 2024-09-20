@@ -23,12 +23,7 @@
                 <div class="w-full flex gap-4 mb-5">
                     <div class="w-1/2 flex flex-col gap-1">
                         <label for="">Color</label>
-                        <select name="color" id="color" class="
-                        w-full py-2 px-3 rounded-xl outline-none">
-                            <option value="" selected disabled></option>
-                            <option value="red">Red</option>
-                            <option value="blue">Blue</option>
-                        </select>
+                        <input name="color" id="color" class="w-full py-2 px-3 rounded-xl outline-none">
                     </div>
                     <div class="w-1/2 flex flex-col gap-1">
                         <label for="">Size</label>
@@ -66,7 +61,8 @@
                     </div>
                 </div>
             </div>
-            <div class="w-full flex justify-end py-3 px-4">
+            <div class="w-full flex justify-end py-3 px-4 items-center gap-10">
+                <button id="reset" class="text-main underline">Reset</button>
                 <button type="button" id="applyFilterButton" class="px-8 py-2 bg-main text-white text-sm rounded-xl">Apply</button>
             </div>
         </div>
@@ -271,6 +267,38 @@
                     }
                 });
             });
+
+            $('#reset').click(function(){
+                $.ajax({
+                    url: "{{ route('office.filter_items') }}",
+                    type: 'GET',
+                    data: $('#filterForm').serialize(),
+                    success: function(data) {
+                        // console.log(data);
+                        $('#displayDiv').empty();
+                        if (data.length > 0) {
+                            $.each(data, function(index, item) {
+                                let itemRow = 
+                                `<a href="/back-office/view_item/${item.id}">
+                                    <div class='w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada]'>
+                                        <p class='w-[40%]'>${item.item}</p>
+                                        <p class='w-[20%]'>${item.category}</p>
+                                        <p class='w-[10%]'>${item.quantity}</p>
+                                        <p class='w-[10%]'>&#8369;${item.cost}</p>
+                                        <p class='w-[10%]'>&#8369;${item.retail}</p>
+                                    </div>
+                                </a>`;
+                                $('#displayDiv').append(itemRow);
+                            });
+                        } else {
+                            $('#filteredItems').append('<p>No items found</p>');
+                        }
+                    },
+                    error: function() {
+                        alert('Error retrieving filtered items');
+                    }
+                });
+            })
         })
 
         function openInventoryOptions(){

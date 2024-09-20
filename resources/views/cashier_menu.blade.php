@@ -121,7 +121,7 @@
                     </div>
                     <div class="w-[40%] py-10 block mx-auto">
                         <div>
-                            <p class="text-center text-5xl font-bold mb-2 text-main">&#8369;{{((($shift->closing_cash + $shift->cash_in) - $cashOutPayments) - $shift->cash_out) + $shift->starting_cash + $cashInCharge + $cashOutCharge}}.00</p>
+                            <p class="text-center text-5xl font-bold mb-2 text-main">&#8369;{{((($shift->closing_cash + $shift->cash_in) - $cashOutPayments) - $shift->cash_out) + ($cashInPayments + $cashInCharge + $cashOutCharge) - $cashOutPayments}}.00</p>
                             <p class="text-center text-lg">Expected Cash</p>
                         </div>
                     </div>

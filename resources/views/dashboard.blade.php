@@ -171,9 +171,11 @@
     <script>
         const itemsData = {
             @foreach($menus as $menu)
-                "{{$menu->qr}}": { item: "{{$menu->item}}", price: {{$menu->retail}} }{{ !$loop->last ? ',' : '' }}
+                "{{$menu->barcode}}": { item: "{{$menu->item}}", price: {{$menu->retail}} }{{ !$loop->last ? ',' : '' }}
             @endforeach
         };
+
+        console.log(itemsData)
     
         let orders = [];
         let currentQuantity = 1;

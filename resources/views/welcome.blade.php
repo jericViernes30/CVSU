@@ -17,7 +17,7 @@
         <input type="text" name="username" class="w-full px-6 py-2 rounded-md outline-none border border-[#565857] mb-4">
         <button class="w-full py-2 border-2 border-main text-main rounded-lg">Continue</button>
       </form>
-      <button onclick="closeDiv()" class="block mx-auto text-sm underline text-main">Cancel</button>
+      <button type="submit" onclick="closeDiv()" class="block mx-auto text-sm underline text-main">Cancel</button>
     </div>
   </div>
   <div id="main" class="w-3/4 h-[80%] flex p-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#fefef8] rounded-3xl shadow-md backdrop-blur-sm border border-opacity-20">
@@ -57,9 +57,9 @@
         </div>
         <input type="hidden" name="role" value="cashier">
         <div class="mb-4">
-          <button class="underline" onclick="forgotPassword(event)">Forgot Password?</button>
+          <button type="button" class="underline" onclick="forgotPassword(event)">Forgot Password?</button>
         </div>
-        <button class="w-full rounded-md py-2 text-main border border-main hover:bg-main hover:text-white ease-in-out duration-100">
+        <button type="submit" class="w-full rounded-md py-2 text-main border border-main hover:bg-main hover:text-white ease-in-out duration-100">
           Login
         </button>
       </form>
