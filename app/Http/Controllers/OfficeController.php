@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\SalesReportExport;
 use App\Models\Authentication;
 use App\Models\History;
+use App\Models\GCash;
 use App\Models\PendingAccount;
 use App\Models\PendingItems;
 use App\Models\Stocks;
@@ -340,51 +341,51 @@ class OfficeController extends Controller
     }
 
     public function filterItems(Request $request)
-    {
-        try {
-            $query = Stocks::query();
+{
+    try {
+        $query = Stocks::query();
 
-            if ($request->filled('color')) {
-                $query->where('color', $request->color);
-            }
-
-            if ($request->filled('size')) {
-                $size = $request->size;
-                switch ($size) {
-                    case 'less_200':
-                        $query->where('size', '<', 200);
-                        break;
-                    case '200_400':
-                        $query->whereBetween('size', [200, 400]);
-                        break;
-                    case '400_1000':
-                        $query->whereBetween('size', [400, 1000]);
-                        break;
-                    case '1000_2000':
-                        $query->whereBetween('size', [1000, 2000]);
-                        break;
-                }
-            }
-
-            if ($request->filled('category')) {
-                $query->where('category', $request->category);
-            }
-
-            if ($request->filled('price_from') && $request->filled('price_to')) {
-                $query->whereBetween('retail', [$request->price_from, $request->price_to]);
-            }
-
-            $filteredItems = $query->get('item');
-
-            $itemNames = $filteredItems->pluck('item')->toArray();
-            $filterResult = Stocks::whereIn('item', $itemNames)->get();
-
-            return response()->json($filterResult);
-        } catch (\Exception $e) {
-            Log::error('Error filtering items: ' . $e->getMessage());
-            return response()->json(['error' => 'Internal Server Error'], 500);
+        // Apply filters only if they are present
+        if ($request->filled('color')) {
+            $query->where('color', $request->color);
         }
+
+        if ($request->filled('size')) {
+            $size = $request->size;
+            switch ($size) {
+                case 'less_200':
+                    $query->where('size', '<', 200);
+                    break;
+                case '200_400':
+                    $query->whereBetween('size', [200, 400]);
+                    break;
+                case '400_1000':
+                    $query->whereBetween('size', [400, 1000]);
+                    break;
+                case '1000_2000':
+                    $query->whereBetween('size', [1, 2]);
+                    break;
+            }
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->filled('price_from') && $request->filled('price_to')) {
+            $query->whereBetween('retail', [$request->price_from, $request->price_to]);
+        }
+
+        // Get all items if no filters are applied
+        $filteredItems = $query->get();
+
+        return response()->json($filteredItems);
+    } catch (\Exception $e) {
+        Log::error('Error filtering items: ' . $e->getMessage());
+        return response()->json(['error' => 'Internal Server Error'], 500);
     }
+}
+
 
     public function itemsList()
     {
@@ -546,8 +547,9 @@ class OfficeController extends Controller
 
         // Query to fetch records with matching date
         $history = History::whereDate('created_at', $today)->get();
+        $gcash_transactions = GCash::whereDate('created_at', $today)->get();
 
-        return view('backoffice/sales_history', ['history' => $history]);
+        return view('backoffice/sales_history', ['history' => $history, 'gcash' => $gcash_transactions]);
     }
 
     public function historyTicket(Request $request, $ticket)
