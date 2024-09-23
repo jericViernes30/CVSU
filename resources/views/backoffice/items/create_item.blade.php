@@ -153,8 +153,6 @@
                         </div>
                         <div class="w-ful flex gap-16">
                             <div class="w-1/2">
-                                <label for="" class="text-gray-500">Item Image</label>
-                                <input type="file" name="item_image" class="mt-1">
                             </div>
                             <div class="w-1/2 flex gap-5 items-center justify-end">
                                 <button type="button" id="submitButton" class="w-[100px] bg-main uppercase rounded-sm py-2 shadow-md font-medium text-black text-xs">Add Item</button>
