@@ -367,27 +367,27 @@
             });
         });
 
-        // function setAmount(amount) {
-        // const cashInput = document.getElementById('cash');
-        // cashInput.value = amount;
+        function setAmount(amount) {
+        const cashInput = document.getElementById('cash');
+        cashInput.value = amount;
 
-        // // Trigger the logic to enable or disable the submit button based on the new amount
-        // var submit = document.getElementById('submitButton');
-        // var total = {{ $pay }}; // Example total value, replace with actual total
-        // var cashVal = parseInt(cashInput.value);
+        // Trigger the logic to enable or disable the submit button based on the new amount
+        var submit = document.getElementById('submitButton');
+        var total = {{ $pay }}; // Example total value, replace with actual total
+        var cashVal = parseInt(cashInput.value);
         
-        // if (isNaN(cashVal) || cashVal < total) {
-        //     console.log("The entered cash is less than the total.");
-        //     submit.disabled = true;
-        //     submit.classList.remove('bg-main');
-        //     submit.classList.add('bg-gray-500');
-        // } else {
-        //     console.log("The entered cash is greater than or equal to the total.");
-        //     submit.disabled = false;
-        //     submit.classList.remove('bg-gray-500');
-        //     submit.classList.add('bg-main');
-        // }
-    // }
+        if (isNaN(cashVal) || cashVal < total) {
+            console.log("The entered cash is less than the total.");
+            submit.disabled = true;
+            submit.classList.remove('bg-main');
+            submit.classList.add('bg-gray-500');
+        } else {
+            console.log("The entered cash is greater than or equal to the total.");
+            submit.disabled = false;
+            submit.classList.remove('bg-gray-500');
+            submit.classList.add('bg-main');
+        }
+    }
 
         function printReceipt(){
             event.preventDefault(); // Prevent default form submission

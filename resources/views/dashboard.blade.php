@@ -270,15 +270,14 @@
             barcodeInput.on('keypress', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    alert('Enter Key is pressed!')
-                    // Check if the #barcode input is not focused
-                    if (!barcodeInput.is(':focus')) {
-                        keepFocus(); // Ensure the input field stays focused
-                        console.log('Barcode not focused')
-                    }
+
+                    // Automatically focus on the barcode input
+                    barcodeInput.focus(); 
+                    console.log('Enter Key is pressed!')
 
                     let barcodeValue = barcodeInput.val().trim();
 
+                    // Check if the barcode exists in the itemsData
                     if (itemsData[barcodeValue]) {
                         let orderItem = itemsData[barcodeValue];
                         for (let i = 0; i < currentQuantity; i++) {
@@ -293,9 +292,9 @@
                     }
 
                     barcodeInput.val(''); // Clear the input field for the next scan
-                    keepFocus(); // Ensure the input field stays focused
                 }
             });
+
 
     
             // Toggle quantity input on specific key press (e.g., `)
