@@ -495,8 +495,8 @@ class OfficeController extends Controller
                 $data->save();
             }
         }
-        $stocks = Stocks::paginate(10);
-        return view('backoffice/inventory/stocks_adjustment', ['item' => $stocks]);
+        $stocks = Stocks::paginate(5);
+        return redirect()->route('office.stocks_adjustment')->with('item', $stocks);
     }
 
     public function salesByItem()
