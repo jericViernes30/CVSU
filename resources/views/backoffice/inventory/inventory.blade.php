@@ -167,7 +167,7 @@
                 <div id="displayDiv">
                     @foreach ($items as $item)
                     @php
-                        $quantity = $item->quantity;
+                        $quantity = $item->quantity == 0 ? 1 : $item->quantity;
                         $cost = $item->cost * $quantity;
                         $retail = $item->retail * $quantity;
                         $profit = $retail - $cost;
