@@ -93,12 +93,8 @@
                                 </div>
                             </div>
                             <div class="w-1/3">
-                                <label for="" class="text-gray-500">Select Category</label>
-                                <select name="category" id="" class="w-full mt-1 px-2 py-1 outline-none border-b-2 bg-slate-50 border-[#eaeaea] focus:border-b-2 focus:border-main">
-                                    <option value="dry_goods">Dry Goods</option>
-                                    <option value="wet_goods">Wet Goods</option>
-                                    <option value="Limited Edition">Limited Edition</option>
-                                </select>
+                                <label for="" class="text-gray-500">Category</label>
+                                <input type="text" name="category" id="" class="w-full mt-1 px-2 py-1 outline-none border-b-2 bg-slate-50 border-[#eaeaea] focus:border-b-2 focus:border-main"></input>
                             </div>
                         </div>
                         <div class="w-full flex items-center justify-between gap-5">
@@ -133,8 +129,6 @@
                         </div>
                         <div class="w-ful flex gap-16">
                             <div class="w-1/2">
-                                <label for="" class="text-gray-500">Item Image</label>
-                                <input type="file" name="item_image" class="mt-1">
                             </div>
                             <div class="w-1/2 flex gap-5 items-center justify-end">
                                 <button type="button" id="submitButton" class="w-[200px] bg-white border-2 border-main hover:bg-main hover:border-2 hover:border-main ease-in-out duration-100 rounded-md py-2 shadow-md font-medium text-xs text-main hover:text-white">Add Item</button>
