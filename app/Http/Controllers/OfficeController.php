@@ -547,17 +547,10 @@ class OfficeController extends Controller
         $quantity = $request->input('quantity');
         $current_stock = $data->quantity;
         if ($data) {
-            if ($option == 'increase') {
-                $new_stock = $current_stock + $quantity;
-                $data->quantity = $new_stock;
-                $data->update_reason = $request->input('reason');
-                $data->save();
-            } elseif ($option == 'decrease') {
-                $new_stock = $current_stock - $quantity;
-                $data->quantity = $new_stock;
-                $data->update_reason = $request->input('reason');
-                $data->save();
-            }
+            $new_stock = $current_stock + $quantity;
+            $data->quantity = $new_stock;
+            $data->update_reason = 'New stocks';
+            $data->save();
         }
         $stocks = Stocks::paginate(5);
         return redirect()->route('office.stocks_adjustment')->with('item', $stocks);
