@@ -54,19 +54,19 @@
                 <input id="item_search" type="search" placeholder="Search for item" name="item" class="w-[400px] px-5 py-2 rounded-lg outline-none border border-[#565857] focus:border-main">
                 <button onclick="window.location.href='{{route('add_item')}}'" class="px-5 bg-[#4d4d4d] font-medium uppercase text-xs py-2 text-white rounded-md">Add Item</button>
                 <div class="w-full flex items-center text-sm py-4 px-5 text-gray-500 border-b border-[#dadada] text-left">
-                    <p class="w-[40%]">Item</p>
+                    <p class="w-[35%]">Item</p>
                     <p class="w-[10%] text-right">In Stock</p>
                     <p class="w-[15%] text-right">Status</p>
-                    <p class="w-[15%] text-right">Last update</p>
-                    <p class="w-[20%] text-right">Recent adjustment</p>
+                    <p class="w-[23%] text-right">Last update</p>
+                    <p class="w-[17%] text-right">Recent adjustment</p>
                 </div>
-                <div id="search_result" class="w-full">
+                <div id="search_result" class="w-full h-[590px] overflow-y-auto">
                     @foreach ($item as $i)
                     @php
                         $quantity = $i->quantity;
                     @endphp
                         <div class='w-full flex items-center text-sm py-4 px-5 text-gray-700 border-b border-[#dadada] text-left'>
-                            <p class='w-[40%]'>{{$i->item}}</p>
+                            <p class='w-[35%]'>{{$i->item}}</p>
                             <p class='w-[10%] text-right'>{{$i->quantity}}</p>
                             @php
                                 if($i->category != 'Limited Edition' && $quantity >= 100){
@@ -83,11 +83,13 @@
                                     echo '<p class="w-[15%] text-red-500 font-medium text-right">Items sold</p>';
                                 } elseif($i->category == 'Limited Edition'){
                                     echo '<p class="w-[15%] text-[#FFD700] font-medium text-right">Limited Edition</p>';
+                                } else {
+                                    echo '<p class="w-[15%] text-red-500 font-medium text-right">No stocks</p>';
                                 }
                             @endphp
                             </p>
-                            <p class='w-[15%] text-right'>{{ \Carbon\Carbon::parse($i->updated_at)->format('F j, Y - g:i A') }}</p>
-                            <p class='w-[20%] text-right'>{{$i->update_reason ?? 'None'}}</p>
+                            <p class='w-[23%] text-right'>{{ \Carbon\Carbon::parse($i->updated_at)->format('F j, Y - g:i A') }}</p>
+                            <p class='w-[17%] text-right'>{{$i->update_reason ?? 'None'}}</p>
                         </div>
                     @endforeach
                 </div>
@@ -96,13 +98,13 @@
                 
 
                 <!-- Your existing pagination UI -->
-                <div class="w-full flex items-center gap-10 pt-2 px-6 text-sm text-gray-500">
+                {{-- <div class="w-full flex items-center gap-10 pt-2 px-6 text-sm text-gray-500">
                     {{ $item->links() }}
                     <div class="flex items-center gap-1 w-[8%]">
                         <p>Page: {{ $item->currentPage() }}</p>
                         <p>of {{ $item->lastPage() }}</p>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

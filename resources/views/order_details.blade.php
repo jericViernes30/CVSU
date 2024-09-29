@@ -30,7 +30,7 @@
     </style>
 </head>
 <body class="w-full h-screen">
-    <div id="coverup" class="hidden w-full bg-main h-screen absolute z-50 opacity-60"></div>
+    <div id="coverup" class="hidden w-full bg-[#363636] h-screen absolute z-30 opacity-60"></div>
     <div id="success_popup" class="hidden bg-white w-1/4 px-7 py-11 rounded-lg absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
         <img src="{{asset('images/success.png')}}" alt="" class="block mx-auto w-[20%] h-auto">
         <p class="text-3xl text-green-500 font-medium text-center mb-4">Payment successful!</p>
@@ -205,9 +205,23 @@
                     <form id="paymentForm" action="{{route('sale')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="w-full py-6 flex items-center justify-center bg-[#3c463f] mb-4 rounded-lg">
-                            <input id="cash" type="text" name="cash" class="bg-[#3c463f] w-full text-5xl text-center text-white outline-none appearance-none bg-none">
+                            <input id="cash" type="number" name="cash" class="bg-[#3c463f] w-full text-5xl text-center text-white outline-none appearance-none bg-none">
                         </div>
-                        <div class="w-full h-[250px] grid grid-cols-3 grid-rows-4 gap-2 mb-9">
+                        <div id="tn_display" class="hidden w-1/3 bg-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg drop-shadow-xl z-40">
+                            <div class="w-full flex items-center justify-between px-6 py-2 rounded-tl-lg rounded-tr-lg bg-blue-500">
+                                <p class="text-white font-medium">GCash Payment</p>
+                                <button type="button" id="close_tn" class="text-white font-bold">x</button>
+                            </div>
+                            <div class="p-4 mb-3">
+                                <input id="tn" type="text" autocomplete="off" name="transaction_number" class="text-center outline-none w-full rounded-lg py-6 text-5xl font-bold uppercase bg-blue-500 text-white">
+                                <p class="text-lg text-center">Transaction Number</p>
+                            </div>
+                            <hr>
+                            <div class="mt-3 w-full flex justify-end items-center p-4">
+                                <button id="gcashPaymentButton" type="submit" class="px-6 py-2 bg-blue-500 rounded-md text-white">Continue</button>
+                            </div>
+                        </div>
+                        {{-- <div class="w-full h-[250px] grid grid-cols-3 grid-rows-4 gap-2 mb-9">
                             <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="1">1</button>
                             <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="2">2</button>
                             <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="3">3</button>
@@ -219,15 +233,26 @@
                             <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="9">9</button>
                             <button type="button" class="rounded-md border-2 shadow-md col-span-2 calc-btn" data-val="0">0</button>
                             <button type="button" class="rounded-md border-2 shadow-md calc-btn" data-val="del">DEL</button>
-                        </div>
+                        </div> --}}
                         <input type="hidden" name="sub_total" value="{{$subTotal}}">
                         <input type="hidden" name="tax" value="{{$tax}}">
                         <input id="payInput" type="hidden" name="pay" value="{{$pay}}">
                         <input type="hidden" name="ticket" value="{{$ticket}}">
                         <input type="hidden" name="customer" value="{{$customer}}">
-                        <button id="submitButton" type="submit" class="w-full py-2 rounded-xl text-lg text-white mb-1" disabled>Pay</button>
+                        <input type="hidden" id="transactionType" name="transaction_type" value=""> <!-- Hidden input field -->
+                        <button id="submitButton" type="submit" class="w-full py-2 rounded-xl text-lg text-white mb-1 cursor-not-allowed" disabled>Cash Payment</button>
+                        <button id="gcashButton" type="button" class="w-full py-2 rounded-xl bg-blue-500 text-lg text-white mb-1">GCash Payment</button>
                         <script>
                             $(document).ready(function() {
+
+                                $('#gcashButton').on('click', function(){
+                                    $('#tn_display').removeClass('hidden')
+                                })
+
+                                $('#close_tn').on('click', function(){
+                                    $('#tn_display').addClass('hidden')
+                                })
+
                                 var pay = {{$pay}};
                                 var new_total = pay;  // Initialize new_total with the initial pay value
                                 
@@ -283,16 +308,16 @@
                                             console.log("Please enter a valid number.");
                                             submit.disabled = true;
                                             submit.classList.remove('bg-main');
-                                            submit.classList.add('bg-gray-500');
+                                            submit.classList.add('bg-gray-500 cursor-not-allowed');
                                         } else if (cashVal < new_total) {
                                             console.log("The entered cash is less than the total.");
                                             submit.classList.remove('bg-main');
-                                            submit.classList.add('bg-gray-500');
+                                            submit.classList.add('bg-gray-500 cursor-not-allowed');
                                             submit.disabled = true;
                                         } else {
                                             console.log("The entered cash is greater than or equal to the total.");
                                             submit.disabled = false;
-                                            submit.classList.remove('bg-gray-500');
+                                            submit.classList.remove('bg-gray-500 cursor-not-allowed');
                                             submit.classList.add('bg-main');
                                         }
                                     });
@@ -316,16 +341,16 @@
                                             console.log("Please enter a valid number.");
                                             submit.disabled = true;
                                             submit.classList.remove('bg-main');
-                                            submit.classList.add('bg-gray-500');
+                                            submit.classList.add('bg-gray-500', 'cursor-not-allowed');
                                         } else if (cashVal < new_total) {
                                             console.log("The entered cash is less than the total.");
                                             submit.classList.remove('bg-main');
-                                            submit.classList.add('bg-gray-500');
+                                            submit.classList.add('bg-gray-500', 'cursor-not-allowed');
                                             submit.disabled = true;
                                         } else {
                                             console.log("The entered cash is greater than or equal to the total.");
                                             submit.disabled = false;
-                                            submit.classList.remove('bg-gray-500');
+                                            submit.classList.remove('bg-gray-500', 'cursor-not-allowed');
                                             submit.classList.add('bg-main');
                                         }
                                 })
@@ -337,11 +362,19 @@
                         </div> --}}
                     </form>
                     <p class="mt-5 text-center mb-5">Quick cash payment</p>
-                    <div class="w-full flex gap-3">
-                        <button onclick="setAmount(20)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 20.00</button>
-                        <button onclick="setAmount(50)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 50.00</button>
-                        <button onclick="setAmount(100)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 100.00</button>
-                        <button onclick="setAmount(200)" class="w-1/4 bg-[#3d3d3d] text-white py-1 rounded-lg">&#8369; 200.00</button>
+                    <div class="w-full flex flex-wrap gap-3">
+                        <div class="w-full flex items-center justify-between gap-3">
+                            <button onclick="setAmount(20)" class="w-1/2 bg-[#3d3d3d] text-white py-4 rounded-lg">&#8369; 20.00</button>
+                            <button onclick="setAmount(50)" class="w-1/2 bg-[#3d3d3d] text-white py-4 rounded-lg">&#8369; 50.00</button>
+                        </div>
+                        <div class="w-full flex items-center justify-between gap-3">
+                            <button onclick="setAmount(100)" class="w-1/2 bg-[#3d3d3d] text-white py-4 rounded-lg">&#8369; 100.00</button>
+                            <button onclick="setAmount(200)" class="w-1/2 bg-[#3d3d3d] text-white py-4 rounded-lg">&#8369; 200.00</button>
+                        </div>
+                        <div class="w-full flex items-center justify-between gap-3">
+                            <button onclick="setAmount(500)" class="w-1/2 bg-[#3d3d3d] text-white py-4 rounded-lg">&#8369; 500.00</button>
+                            <button onclick="setAmount(1000)" class="w-1/2 bg-[#3d3d3d] text-white py-4 rounded-lg">&#8369; 1000.00</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -349,9 +382,33 @@
     </div>
     <script>
         $(document).ready(function() {
-            var submit = document.getElementById('submitButton');
-            submit.addEventListener('click', function(event) {
+            var cashButton = document.getElementById('submitButton');
+            cashButton.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the form from submitting immediately
+
+            // Set the hidden input's value to 'cash'
+            document.getElementById('transactionType').value = 'cash';
+
+            // Show the success popup and coverup
+            document.getElementById('success_popup').classList.remove('hidden');
+            document.getElementById('coverup').classList.remove('hidden');
+
+            // Wait for 1 second before submitting the form
+            setTimeout(function() {
+                document.getElementById('success_popup').classList.add('hidden');
+                document.getElementById('coverup').classList.add('hidden');
+                // Submit the form
+                document.getElementById('paymentForm').submit();
+                }, 2000); // 2000 milliseconds = 2 seconds
+            });
+
+            // Handle GCash Payment
+            var gcashButton = document.getElementById('gcashPaymentButton');
+            gcashButton.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent the form from submitting immediately
+
+                // Set the hidden input's value to 'gcash'
+                document.getElementById('transactionType').value = 'gcash';
 
                 // Show the success popup and coverup
                 document.getElementById('success_popup').classList.remove('hidden');
@@ -361,10 +418,34 @@
                 setTimeout(function() {
                     document.getElementById('success_popup').classList.add('hidden');
                     document.getElementById('coverup').classList.add('hidden');
-                    // Submit the form by selecting the form element and calling submit on it
+                    // Submit the form
                     document.getElementById('paymentForm').submit();
-                }, 2000); // 1000 milliseconds = 1 second
+                }, 2000); // 2000 milliseconds = 2 seconds
             });
+
+            // Function to check the length of the input
+            $('#tn').on('input', function() {
+                var tnLength = $(this).val().length;
+
+                // Check if the length is 13
+                if (tnLength === 13) {
+                    $('#gcashPaymentButton').prop('disabled', false) // Enable the button
+                        .removeClass('bg-gray-300 text-gray-500 cursor-not-allowed') // Remove disabled classes
+                        .addClass('bg-blue-500 text-white'); // Add enabled classes
+                } else {
+                    $('#gcashPaymentButton').prop('disabled', true) // Disable the button
+                        .removeClass('bg-blue-500 text-white') // Remove enabled classes
+                        .addClass('bg-gray-300 text-gray-500 cursor-not-allowed'); // Add disabled classes
+                }
+            });
+
+            // Initial check in case the input is already filled
+            if ($('#tn').val().length !== 13) {
+                $('#gcashPaymentButton').prop('disabled', true) // Disable the button
+                    .removeClass('bg-blue-500 text-white') // Remove enabled classes
+                    .addClass('bg-gray-300 text-gray-500 cursor-not-allowed'); // Add disabled classes
+            }
+
         });
 
         function setAmount(amount) {

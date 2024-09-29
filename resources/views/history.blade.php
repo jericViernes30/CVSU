@@ -30,7 +30,8 @@
             <p>Change</p>
             <p>&#8369;<span id="change_amount">50</span></p>
         </div>
-        <div class="w-full px-2 flex items-center pt-2 justify-end text-sm text-gray-500">
+        <div class="w-full px-2 flex flex-col items-center pt-2 justify-end text-sm text-gray-500">
+            <p>Transaction Type: <span id="tn_type" class="font-medium"></span></p>
             <p id="sale_time">5/8/24 10:49 AM</p>
         </div>
     </div>
@@ -95,20 +96,18 @@
                             <p class="text-center font-semibold text-2xl mb-3">Cashier Transactions</p>
                             <div class="w-full flex items-center p-2 bg-[#bebebe] uppercase font-medium text-sm">
                                 <p class="w-[15%] text-xs">Transaction #</p>
-                                <p class="w-[20%]">Time</p>
-                                <p class="w-[20%]">Customer</p>
-                                <p class="w-[15%]">Type</p>
-                                <p class="w-[15%]">Total</p>
+                                <p class="w-[35%]">Date & Time</p>
+                                <p class="w-[20%]">Payment Type</p>
+                                <p class="w-[15%]">Total (&#8369;)</p>
                                 <div class="w-[15%]"></div>
                             </div>
                             <div class="flex-1 overflow-y-auto">
                                 @forelse ($history as $sale)
                                     <div class="w-full flex border-b border-[#bebebe] p-2 text-sm items-center">
                                         <p class="w-[15%]">{{ $sale->ticket }}</p>
-                                        <p class="w-[20%]">{{ $sale->created_at->format('g:i A') }}</p>
-                                        <p class="w-[20%]">{{ $sale->customer }}</p>
-                                        <p class="w-[15%]">{{ $sale->type }}</p>
-                                        <p class="w-[15%]">&#8369; {{ $sale->total }}</p>
+                                        <p class="w-[35%]">{{ $sale->created_at->format('F d - g:i A') }}</p>
+                                        <p class="w-[20%]">{{ $sale->type }}</p>
+                                        <p class="w-[15%]">{{ $sale->total }}</p>
                                         <div class="w-[15%]">
                                             @php
                                                 if($sale->type != 'PETTY CASH' && $sale->type != 'PAY IN' && $sale->type != 'CASH IN' && $sale->type != 'CASH OUT'){
@@ -220,6 +219,13 @@
 
                     // Construct the formatted date string
                     var formattedDate = `${month}-${day}-${year} ${hours}:${minutes}:${seconds}`;
+
+                    if(response.result[0].cash < 1){
+                        $('#tn_type').text('GCash')
+                        $('#change_amount').text(0);
+                    } else {
+                        $('#tn_type').text('Cash')
+                    }
 
                     // Update sale time
                     $('#sale_time').text(formattedDate);
