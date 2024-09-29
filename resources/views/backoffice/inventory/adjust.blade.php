@@ -81,24 +81,13 @@
                                 <p class="text-3xl font-medium text-gray-800">{{$item->item}}</p>
                             </div>
                         </div>
-                        <div class="w-full mb-10">
-                            <label for="" class="text-gray-500">Select an option</label>
-                            <select name="option" id="option" class="w-full p-2 outline-none border rounded-md mb-5 text-center focus:border-b-2 focus:border-main mt-1">
-                                <option value="none" default>--    Select option   --</option>
-                                <option value="increase">Increase stocks</option>
-                                <option value="decrease">Decrease stocks</option>
-                            </select>
-                            <label for="" class="text-gray-500">Select reason</label>
-                            <select name="reason" id="reason" class="w-full p-2 outline-none border rounded-md mb-5 focus:border-b-2 focus:border-main mt-1">
-                            </select>
-                        </div>
                         <div id="fields" class="w-full">
                             <div class="w-full mb-10">
-                                <label for="" class="text-gray-500">Quantity</label>
+                                <label for="" class="text-gray-500">Quantity to add</label>
                                 <input type="text" name="quantity" value="1" class="w-full mt-1 px-2 py-1 outline-none border-b-2 bg-slate-50 border-[#eaeaea] focus:border-b-2 focus:border-main text-center">
                             </div>
                             <div class="w-full flex gap-5 items-center justify-end">
-                                <button class="w-[100px] bg-main uppercase rounded-sm py-2 shadow-md font-medium text-white">Save</button>
+                                <button class="w-[100px] bg-main uppercase rounded-sm py-2 shadow-md font-medium text-white">add</button>
                             </div>
                         </div>
                     </div>
