@@ -134,8 +134,16 @@
             </div>
         </div>
         <div id="main" class="w-[95%] bg-[#f2f2f2] z-0 p-7">
-            <div class="w-full h-[650px] overflow-y-auto bg-[#fefefe] shadow-md py-6 rounded-xl">
+            <form id="acceptForm" action="{{route('dummy')}}" method="GET">
+                @csrf
+                <input type="hidden" name="selected_items" id="selectedItems" />
+            </form>
+            <div class="w-full h-[650px] overflow-y-auto bg-[#fefefe] shadow-md rounded-xl">
+                <div class="w-full flex justify-end p-4">
+                    <button type="button" id="acceptSelected" class="px-6 py-2 rounded-md bg-main text-white">Accept</button>
+                </div>
                 <div class="w-full flex items-center bg-slate-300 py-4 px-6">
+                    <input type="checkbox" id="selectAll" class="mr-2"/>
                     <p class="w-[30%]">Item name</p>
                     <p class="w-[10%]">Category</p>
                     <p class="w-[20%]">Supplier</p>
@@ -147,6 +155,7 @@
                 </div>
                 @foreach ($items as $item)
                 <div class="w-full flex items-center py-4 border-b px-6">
+                    <input type="checkbox" name="item" class="mr-2" value="{{ $item->item }}"/>
                     <p class="w-[30%]">{{ $item->item }}</p>
                     <p class="w-[10%]">{{ $item->category }}</p>
                     <p class="w-[20%]">{{ $item->supplier }}</p>
@@ -158,7 +167,7 @@
                         <a href="/back-office/accept-item/{{$item->id}}" class="w-1/2">
                             <img src="{{asset('images/check.png')}}" alt="" class="w-[70%]">
                         </a>
-                        <a href="#" class="w-1/2">
+                        <a href="/back-office/delete-item/{{$item->id}}" class="w-1/2">
                             <img src="{{asset('images/delete1.png')}}" alt="" class="w-[70%]">
                         </a>
                     </div>
@@ -171,6 +180,30 @@
         var main = document.getElementById('main')
 
         $(document).ready(function() {
+            $('#selectAll').on('click', function() {
+                const isChecked = $(this).is(':checked');
+                $("input[name='item']").prop('checked', isChecked);
+            });
+
+            // Handle the accept selected button click
+            $('#acceptSelected').on('click', function() {
+                // Collect all selected item values
+                const selectedItems = [];
+                $("input[name='item']:checked").each(function() {
+                    selectedItems.push($(this).val());
+                });
+
+                if (selectedItems.length > 0) {
+                    // Assign the selected items to the hidden input field
+                    $('#selectedItems').val(selectedItems.join(','));
+
+                    // Submit the form
+                    $('#acceptForm').submit();
+                } else {
+                    alert('Please select at least one item to accept.');
+                }
+            });
+
             $('#item_search').on('keyup', function(){
             var key = $(this).val();
             var url = '{{route("office.item_list_search", ["key" => ":key"])}}';
