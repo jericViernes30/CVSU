@@ -109,7 +109,7 @@
             <div class="w-3/4 p-6 bg-[#e4e4e4]">
                 <div class="w-full flex justify-between">
                     <div class="relative w-1/4">
-                        <input id="search_item" type="text" name="search" placeholder="Search item" class="w-full rounded-full py-1 px-4 outline-none">
+                        <input id="search_item" type="text" name="search" placeholder="Search item or category " class="w-full rounded-full py-1 px-4 outline-none">
                         <img src="{{asset('images/search.png')}}" alt="" class="w-[8%] absolute right-2 top-1">
                     </div>
                     <input id="barcode" type="search" name="barcode" placeholder="Barcode" class="py-1 px-4 outline-none w-[20%] mb-6 rounded-xl">
