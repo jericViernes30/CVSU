@@ -10,7 +10,7 @@
 </head>
 <body class="w-full h-screen relative">
     <div id="coverup" class="hidden w-full bg-main h-screen absolute z-40 opacity-30"></div>
-    <div id="moneyTransactions" class="hidden w-1/2 p-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl z-50">
+    {{-- <div id="moneyTransactions" class="hidden w-1/2 p-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl z-50">
         <div class="w-full flex gap-4">
             <div class="w-full px-5 py-3">
                 <p class="pb-2 border-b border-[#565857] font-medium text-[#565857]">Pay ins</p>
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <div id="quantity-div" class="w-1/6 p-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 hidden">
         <p>Input quantity</p>
         <input type="number" id="quantity-input" class="w-full py-2 text-center rounded-sm outline-none border" value="1">
@@ -114,7 +114,7 @@
                     </div>
                     <input id="barcode" type="search" name="barcode" placeholder="Barcode" class="py-1 px-4 outline-none w-[20%] mb-6 rounded-xl">
                 </div>
-                <div id="foods" class="w-full grid grid-cols-5 grid-rows-5 gap-4 h-[90%] overflow-y-auto">
+                <div id="foods" class="w-full grid grid-cols-5 gap-4 h-[90%] overflow-y-auto">
                     @foreach ($menus as $menu)
                        <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="{{$menu->item}}" data-price="{{$menu->retail}}">
                             <p class="">{{$menu->item}} {{$menu->size}}</p>
@@ -129,12 +129,12 @@
                 <form action="{{route('ticket_details')}}" class="w-full h-[700px] p-4 bg-white border rounded-xl" method="get">
                     @csrf
                     <div class="w-full flex justify-between py-2 border-b border-bd items-center">
-                        <div class="w-1/2">
-                            <input id="customer" type="text" name="customer" placeholder="Customer Name" class="w-full border border-[#565857] rounded-xl outline-none py-2 px-4">
-                        </div>
-                        <div class="w-1/4 items-center justify-center flex flex-col">
+                        <div class="w-1/4 items-center justify-center flex gap-2">
                             <p class="text-xs text-[#565857]">Sale #:</p>
                             <p class="font-medium">{{$ticket}}</p>
+                        </div>
+                        <div class="w-1/2">
+                            {{-- <input id="customer" type="text" name="customer" placeholder="Customer Name" class="w-full border border-[#565857] rounded-xl outline-none py-2 px-4"> --}}
                         </div>
                         <div class="w-1/4 flex justify-end items-center">
                             <button type="button" id="clear" class="w-[25px] h-[25px] rounded-full border border-black flex items-center justify-center">
@@ -156,10 +156,10 @@
                             </div>
                         </div>
                         <div class="w-full flex flex-col items-center justify-between gap-2 text-sm text-white">
+                            {{-- <button type="submit" name="action" value="gcash" class="w-full py-4 rounded-xl bg-blue-500 text-white font-medium">GCash Payment</button> --}}
                             <button type="submit" id="proceed" name="action" value="proceed" class="w-full rounded-xl py-4 bg-[#565857]">
                                 Order's Empty
                             </button>
-                            <button type="submit" name="action" value="gcash" class="w-full py-4 rounded-xl bg-blue-500 text-white font-medium">GCash</button>
                         </div>
                     </div>
                     <input type="hidden" name="ticket" value="{{$ticket}}">
@@ -210,32 +210,47 @@
             
 
             $("#search_item").on('keyup', function(){
-                var key = $(this).val()
-                var url = "{{ route('livesearch', ['key' => ':key']) }}"
-                url = url.replace(':key', key)
+    var key = $(this).val();
+    var url = "{{ route('livesearch', ['key' => ':key']) }}";
+    url = url.replace(':key', key);
 
-                $.ajax({
-                    url: url,
-                    method: 'GET',
-                    success: function(response){
-                        var foodsDiv = $('#foods');
-                        foodsDiv.empty(); // Clear the current contents
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(response){
+            var foodsDiv = $('#foods');
+            foodsDiv.empty(); // Clear the current contents
 
-                        response.menus.forEach(function(menu) {
-                            var menuButton = `
-                            <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="${menu.item}" data-price="${menu.retail}">
-                                <p class="">${menu.item}</p>
-                                <p class="font-medium">&#8369; ${menu.retail}.00</p>
-                            </button>
-                            `;
-                            foodsDiv.append(menuButton);
-                        });
-                    },
-                    error: function(xhr, status, error){
-                        console.error(xhr, status, error);
-                    }
-                })
-            })
+            // Check the number of results and conditionally add grid-rows-5
+            if (response.menus.length < 20) {
+                foodsDiv.addClass('grid-rows-5');
+            } else {
+                foodsDiv.removeClass('grid-rows-5');
+            }
+
+            if (response.menus.length > 0) {
+                response.menus.forEach(function(menu) {
+                    var menuButton = `
+                    <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="${menu.item}" data-price="${menu.retail}">
+                        <p class="">${menu.item} ${menu.size}</p>
+                        <p class="font-medium">&#8369; ${menu.retail}.00</p>
+                        <p class="text-xs text-[#a3a3a3]">${menu.quantity} in stock</p>
+                    </button>
+                    `;
+                    foodsDiv.append(menuButton);
+                });
+            } else {
+                // Optionally handle the case where no items match the search
+                foodsDiv.append('<p class="text-center text-gray-500">No items found</p>');
+            }
+        },
+        error: function(xhr, status, error){
+            console.error(xhr, status, error);
+        }
+    });
+});
+
+
     
             // Function to keep the input field focused
             function keepFocus() {
