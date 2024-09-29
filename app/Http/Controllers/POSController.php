@@ -51,13 +51,16 @@ class POSController extends Controller
             // Return all items if the search key is empty
             $menus = Stocks::all();
         } else {
-            // Perform the search query
-            $menus = Stocks::where('item', 'LIKE', "%{$key}%")->get();
+            // Perform the search query for both item and category
+            $menus = Stocks::where('item', 'LIKE', "%{$key}%")
+                ->orWhere('category', 'LIKE', "%{$key}%")
+                ->get();
         }
 
         // Return the results as a JSON response
         return response()->json(['menus' => $menus]);
     }
+
 
     public function ticketDetails(Request $request){
         $action = $request->input('action');
@@ -272,6 +275,7 @@ class POSController extends Controller
     }
 
     public function sale(Request $request){
+        $transaction_type = $request->input('transaction_type');
         $ticketNumber = $request->input('ticket');
         $cashier_name = session('cashier_name');
         if(!isset($cashier_name)){
@@ -304,7 +308,7 @@ class POSController extends Controller
             'type' => 'SALE',
             'sub_total' => $request->input('sub_total'),
             'tax' => $request->input('tax'),
-            'cash' => $request->input('cash'),
+            'cash' => $request->input('cash') ?? 0,
             'total' => $request->input('pay'),
             'change' => $change,
         ];
@@ -323,6 +327,22 @@ class POSController extends Controller
         $sales_today = $starting_cash + $shift_sales_total;
         $shift->closing_cash = $sales_today;
         $shift->save();
+
+        if($transaction_type == 'gcash'){
+            $transaction = History::where('ticket', $ticketNumber)->first();
+
+            $data = [
+                'transaction_number' => $request->input('transaction_number'),
+                'type' => 'Cash In',
+                'amount' => $request->input('pay'),
+                'charge' => 0
+            ];
+
+            $transaction->type = 'GCash';
+            $transaction->save();
+
+            $gcashSave = GCash::create($data);
+        }
 
         if($insert){
             return redirect()->intended(route('dashboard', ['menus' => $menu, 'ticket' => $ticket]));
@@ -360,7 +380,7 @@ class POSController extends Controller
                     ->sum('total');
 
         $cash_in_payments = History::where('cashier', $cashier_name)
-                    ->where('type', 'CASH IN')
+                    ->where('type', 'GCash')
                     ->whereDate('created_at', Carbon::today())
                     ->sum('total');
 
@@ -538,7 +558,7 @@ class POSController extends Controller
     }
 
     public function inventory(){
-        $data = Stocks::paginate(8);
+        $data = Stocks::all();
         return view('pos_inventory', ['item' => $data]);
     }
 

@@ -82,8 +82,18 @@ Route::middleware([IsAdminLoggedIn::class])->group(function(){
     Route::get('/back-office/filter-supplier-address', [OfficeController::class, 'filterSupplierAddress'])->name('office.filter_address');
     Route::get('/back-office/pending-items', [OfficeController::class, 'pendingItems'])->name('office.pending_items');
     Route::get('/back-office/accept-item/{id}', [OfficeController::class, 'acceptAddedItem'])->name('office.accept_item');
+    Route::get('/back-office/delete-item/{id}', [OfficeController::class, 'deleteItem'])->name('office.delete_item');
     Route::get('/back-office/fetch-order-details', [OfficeController::class, 'fetchBatchDetails'])->name('fetchBatchDetails');
     Route::get('/back-office/remove-cashier/{id}', [OfficeController::class, 'resignCashier']);
+    Route::get('/back-office/name-order', [OfficeController::class, 'nameOrder'])->name('office.name_order');
+    Route::get('/back-office/default-order', [OfficeController::class, 'defaultOrder'])->name('office.default_order');
+    Route::get('/back-office/stock-order', [OfficeController::class, 'stockOrder'])->name('office.stock_order');
+    Route::get('/back-office/default-stock-order', [OfficeController::class, 'defaultStockOrder'])->name('office.default_stock_order');
+    Route::get('back-office/expiration-date', [OfficeController::class, 'expirationDate'])->name('office.expiration_date');
+    Route::get('/back-office/item-search-v2/{key}', [OfficeController::class, 'itemSearchV2'])->name('office.item_search_v2');
+    Route::get('/back-office/print-report', [OfficeController::class, 'printReport'])->name('office.print_report');
+
+    Route::get('dummy', [OfficeController::class, 'addMultiple'])->name('dummy');
 });
 
 

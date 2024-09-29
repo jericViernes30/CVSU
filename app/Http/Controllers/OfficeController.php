@@ -162,6 +162,7 @@ class OfficeController extends Controller
         $eveningAverage = ($totalRows > 0) ? ($eveningCount / $totalRows) * 100 : 0; // Percentage
 
         $gross_sales = $rowsThisYear->sum('total');
+        $net_sales_today = History::whereDate('created_at', $dateToday)->sum('total');
         $net_sales = $rowsThisYear->sum('sub_total');
 
         // Get all rows for the current month
@@ -236,6 +237,7 @@ class OfficeController extends Controller
             'chartData' => $chartDataValues,
             'polarLabels' => $polarLabels,
             'polarData' => $polarData,
+            'netSalesToday' => $net_sales_today
         ]);
     }
     public function getMonthlySales(Request $request)
@@ -336,9 +338,26 @@ class OfficeController extends Controller
 
     public function stocksAdjustment()
     {
-        $data = Stocks::paginate(8);
-        return view('backoffice/inventory/stocks_adjustment', ['item' => $data]);
+        // Get all items from the Stocks model
+        $stockItems = Stocks::all();
+
+        // Get the distinct item names from the Stocks model
+        $stockItemNames = $stockItems->pluck('item')->toArray();
+
+        // Find the latest occurrence for each item in the SupplierOrder model
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('item')
+            ->keyBy('item'); // Key by item name for easy lookup
+
+        // Pass both stocks and the latest matching orders to the view
+        return view('backoffice/inventory/stocks_adjustment', [
+            'items' => $stockItems,
+            'latestOrders' => $latestMatchingOrders,
+        ]);
     }
+
 
     public function filterItems(Request $request)
 {
@@ -368,6 +387,18 @@ class OfficeController extends Controller
             }
         }
 
+        if ($request->filled('quantity')) {
+            $quantity = $request->quantity;
+            switch ($quantity) {
+                case 'less_50':
+                    $query->where('quantity', '<', 50);
+                    break;
+                case 'less_100':
+                    $query->where('quantity', '<', 100);
+                    break;
+            }
+        }
+
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
@@ -376,15 +407,48 @@ class OfficeController extends Controller
             $query->whereBetween('retail', [$request->price_from, $request->price_to]);
         }
 
-        // Get all items if no filters are applied
+        // Join with the SupplierOrder model to access the expiration_date
+        $query->leftJoin('supplier_orders', 'stocks.item', '=', 'supplier_orders.item')
+              ->select('stocks.*', 'supplier_orders.expiration_date');
+
+        if ($request->filled('expiration_date')) {
+            $expirationFilter = $request->expiration_date;
+            switch ($expirationFilter) {
+                case 'less_15':
+                    $query->where('supplier_orders.expiration_date', '<=', now()->addDays(15));
+                    break;
+                case 'less_60':
+                    $query->where('supplier_orders.expiration_date', '<=', now()->addDays(60));
+                    break;
+            }
+        }
+
+        // Get all filtered items
         $filteredItems = $query->get();
 
-        return response()->json($filteredItems);
+        $stockItemNames = $filteredItems->pluck('item')->toArray();
+
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('item') // Keep only the latest unique items
+            ->keyBy('item'); // Key by item name for easy lookup
+
+        // Combine stocks and latest matching orders
+        $combinedResults = $filteredItems->map(function ($stock) use ($latestMatchingOrders) {
+            // Add latest order details if available
+            $latestOrder = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+            $stock->setAttribute('latest_order', $latestOrder); // Use setAttribute to safely add the property
+            return $stock;
+        });
+
+        return response()->json($combinedResults);
     } catch (\Exception $e) {
         Log::error('Error filtering items: ' . $e->getMessage());
         return response()->json(['error' => 'Internal Server Error'], 500);
     }
 }
+
 
 
     public function itemsList()
@@ -930,5 +994,285 @@ class OfficeController extends Controller
         }
     }
 
+    public function nameOrder() {
+        // Fetch stocks ordered by item name
+        $stocks = Stocks::orderBy('item', 'asc')->get();
+        
+        // Get item names from the fetched stocks
+        $stockItemNames = $stocks->pluck('item')->toArray();
+    
+        // Find the latest occurrence for each item in the SupplierOrder model
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('item') // Keep only the latest unique items
+            ->keyBy('item'); // Key by item name for easy lookup
+    
+        // Combine stocks and latest matching orders
+        $combinedResults = $stocks->map(function ($stock) use ($latestMatchingOrders) {
+            // Add latest order details if available
+            $stock->latest_order = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+            return $stock;
+        });
+    
+        // Return combined results as JSON
+        return response()->json($combinedResults);
+    }
+    
+    
 
+    public function defaultOrder() {
+        // Fetch stocks ordered by item name
+        $stocks = Stocks::orderBy('id', 'asc')->get();
+        
+        // Get item names from the fetched stocks
+        $stockItemNames = $stocks->pluck('item')->toArray();
+    
+        // Find the latest occurrence for each item in the SupplierOrder model
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('item') // Keep only the latest unique items
+            ->keyBy('item'); // Key by item name for easy lookup
+    
+        // Combine stocks and latest matching orders
+        $combinedResults = $stocks->map(function ($stock) use ($latestMatchingOrders) {
+            // Add latest order details if available
+            $stock->latest_order = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+            return $stock;
+        });
+    
+        // Return combined results as JSON
+        return response()->json($combinedResults);
+    }
+
+    public function stockOrder(){
+        $stocks = Stocks::orderByRaw('CAST(quantity AS UNSIGNED) ASC')->get();
+        // Get item names from the fetched stocks
+        $stockItemNames = $stocks->pluck('item')->toArray();
+    
+        // Find the latest occurrence for each item in the SupplierOrder model
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('item') // Keep only the latest unique items
+            ->keyBy('item'); // Key by item name for easy lookup
+    
+        // Combine stocks and latest matching orders
+        $combinedResults = $stocks->map(function ($stock) use ($latestMatchingOrders) {
+            // Add latest order details if available
+            $stock->latest_order = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+            return $stock;
+        });
+    
+        // Return combined results as JSON
+        return response()->json($combinedResults);
+    }
+
+    public function defaultStockOrder(){
+        $stocks = Stocks::orderByRaw('CAST(quantity AS UNSIGNED) DESC')->get();
+        // Get item names from the fetched stocks
+        $stockItemNames = $stocks->pluck('item')->toArray();
+    
+        // Find the latest occurrence for each item in the SupplierOrder model
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('item') // Keep only the latest unique items
+            ->keyBy('item'); // Key by item name for easy lookup
+    
+        // Combine stocks and latest matching orders
+        $combinedResults = $stocks->map(function ($stock) use ($latestMatchingOrders) {
+            // Add latest order details if available
+            $stock->latest_order = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+            return $stock;
+        });
+    
+        // Return combined results as JSON
+        return response()->json($combinedResults);
+    }
+
+    public function expirationDate(){
+        // Get all distinct item names from the Stocks model
+        $stockItems = Stocks::pluck('item')->toArray();
+
+        // Find SupplierOrders that have an item matching any item in the Stocks model
+        $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItems)
+            ->orderBy('created_at', 'desc') // Ensure this orders by the latest created record
+            ->get()
+            ->unique('item'); // Get only the latest occurrence per item
+
+        dd($latestMatchingOrders);
+        // Display the matching rows
+        foreach ($matchingOrders as $order) {
+            echo 'Order ID: ' . $order->id . ' - Item: ' . $order->item . '<br>';
+        }
+    }
+
+    public function itemSearchV2($key = null){
+        if (empty($key)) {
+            // Return all items if the search key is empty
+            $stocks = Stocks::all();
+            $stockItemNames = $stocks->pluck('item')->toArray();
+    
+            // Find the latest occurrence for each item in the SupplierOrder model
+            $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+                ->get()
+                ->unique('item') // Keep only the latest unique items
+                ->keyBy('item'); // Key by item name for easy lookup
+        
+            // Combine stocks and latest matching orders
+            $combinedResults = $stocks->map(function ($stock) use ($latestMatchingOrders) {
+                // Add latest order details if available
+                $stock->latest_order = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+                return $stock;
+            });
+            // Return the results as a JSON response
+            return response()->json($combinedResults);
+        } else {
+            // Perform the search query
+            $stocks = Stocks::where('item', 'LIKE', "%{$key}%")->get();$stockItemNames = $stocks->pluck('item')->toArray();
+    
+            // Find the latest occurrence for each item in the SupplierOrder model
+            $latestMatchingOrders = SupplierOrder::whereIn('item', $stockItemNames)
+                ->get()
+                ->unique('item') // Keep only the latest unique items
+                ->keyBy('item'); // Key by item name for easy lookup
+        
+            // Combine stocks and latest matching orders
+            $combinedResults = $stocks->map(function ($stock) use ($latestMatchingOrders) {
+                // Add latest order details if available
+                $stock->latest_order = $latestMatchingOrders->get($stock->item, null); // Default to null if not found
+                return $stock;
+            });
+            // Return the results as a JSON response
+            return response()->json($combinedResults);
+        }
+    }
+
+    public function addMultiple(Request $request)
+    {
+        $stocks = Stocks::paginate(8);
+        // Retrieve the selected items from the form as an array
+        $selectedItems = explode(',', $request->input('selected_items'));
+
+        // Query all items from the PendingItems model that match the selected IDs
+        $items = PendingItems::whereIn('item', $selectedItems)->get();
+
+        foreach ($items as $item) {
+            $data = [
+                'item' => $item->item,
+                'category' => $item->category,
+                'supplier' => $item->supplier,
+                'product_unit' => $item->product_unit,
+                'color' => $item->color,
+                'size' => $item->size,
+                'barcode' => $item->barcode,
+                'quantity' => 0,
+                'cost' => $item->cost,
+                'retail' => $item->retail,
+            ];
+
+            // Create a new stock entry for each item
+            $add = Stocks::create($data);
+
+            // Delete the item from PendingItems if added successfully
+            if ($add) {
+                $item->delete();
+            }
+        }
+
+        return redirect()->route('office.items_list', [
+            'items' => $stocks
+        ])->with('success', 'Items successfully added to stocks.');
+    }
+
+    public function deleteItem($id){
+        $stocks = Stocks::paginate(8);
+        $item = PendingItems::find($id);
+
+        $item->delete();
+
+        return redirect()->route('office.items_list', [
+            'items' => $stocks
+        ])->with('success', 'Items successfully deleted.');
+    }
+
+    public function printReport()
+    {
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+        
+        $dates = [];
+        
+        // Iterate through each day of the month
+        for ($date = $startOfMonth; $date->lte($endOfMonth); $date->addDay()) {
+            $formattedDate = $date->format('Y-m-d');
+            
+            // Calculate the sum of the 'total' column for the specific day
+            $totalSales = History::whereDate('created_at', $formattedDate)->sum('total');
+            
+            // Get all unique ticket numbers for the specific day
+            $tickets = History::whereDate('created_at', $formattedDate)
+                ->pluck('ticket')
+                ->unique()
+                ->toArray();
+            
+            // Initialize an array to hold food names and their costs/retail values
+            $foodDetails = [];
+            $totalCost = 0;
+            $totalRetail = 0;
+
+            // Use ticket numbers to get food names from the Ticket model
+            if (!empty($tickets)) {
+                // Retrieve food names along with their counts
+                $foodCounts = Ticket::whereIn('ticket', $tickets)
+                    ->select('food_name', DB::raw('count(*) as count')) // Use DB facade
+                    ->groupBy('food_name')
+                    ->get();
+
+                foreach ($foodCounts as $foodCount) {
+                    $foodName = $foodCount->food_name;
+                    $count = $foodCount->count;
+
+                    $stockItem = Stocks::where('item', $foodName)->first(['cost', 'retail']);
+                    if ($stockItem) {
+                        // Multiply cost and retail by the occurrence count
+                        $costTotal = $stockItem->cost * $count;
+                        $retailTotal = $stockItem->retail * $count;
+
+                        $foodDetails[] = [
+                            'food_name' => $foodName,
+                            'cost' => $costTotal, // Total cost for this item
+                            'retail' => $retailTotal, // Total retail for this item
+                            'occurrences' => $count, // Add the occurrence count
+                        ];
+                        // Add to overall total cost and retail
+                        $totalCost += $costTotal;
+                        $totalRetail += $retailTotal;
+                    } else {
+                        // If not found, you can set cost and retail to null or any default value
+                        $foodDetails[] = [
+                            'food_name' => $foodName,
+                            'cost' => null,
+                            'retail' => null,
+                            'occurrences' => $count, // Add the occurrence count
+                        ];
+                    }
+                }
+            }
+
+            // Add the date, total sales, tickets, food details, and totals to the array
+            $dates[] = [
+                'date' => $formattedDate,
+                'total' => $totalSales > 0 ? $totalSales : 0, // Set to 0 if there are no sales
+                'tickets' => $tickets, // Use 'tickets' instead of 'ticket_numbers'
+                'food_details' => $foodDetails, // Add food details (cost and retail)
+                'total_cost' => $totalCost, // Total cost for the day
+                'total_retail' => $totalRetail, // Total retail for the day
+            ];
+        }
+
+        return response()->json($dates); // Return the data as JSON or use as needed
+    }
 }
