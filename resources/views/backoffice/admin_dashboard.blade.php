@@ -9,9 +9,48 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     @vite('resources/css/app.css')
     <title>Back Office</title>
+    <style>
+        .hide-scrollbar {
+            scrollbar-width: none; /* For Firefox */
+        }
+    
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none; /* For Chrome, Safari, and Edge */
+        }
+    </style>
 </head>
 
 <body class="w-full h-screen overflow-hidden bg-[#f2f2f2]">
+    <div id="coverup" class="hidden w-full bg-[#1b1b1b] h-screen absolute z-30 opacity-60"></div>
+    <div id="report" class="hidden w-1/2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 p-5 bg-white">
+        <button id="close_report" type="button" class="font-bold text-lg absolute top-5 right-5">x</button>
+        <p class="text-center font-semibold text-2xl mb-4">Sales Summary</p>
+        <div class="text-xs font-medium border-b-4 pb-4 border-black">
+            <p class="mb-5">Date: <span>Sep 30, 2024</span></p>
+            <p>Report Period: <span>Sep 1, 2024 to Sep 30, 2024</span></p>
+        </div>
+        <div class="w-full flex items-center py-4 font-semibold text-sm">
+            <p class="w-[22%]">Date</p>
+            <p class="w-[13%] text-right">Items Sold</p>
+            <p class="w-[13%] text-right">Cost</p>
+            <p class="w-[13%] text-right">Retail</p>
+            <p class="w-[13%] text-right">Total</p>
+            <p class="w-[13%] text-right">Net Sales</p>
+            <p class="w-[13%] text-right">Gross Profit</p>
+        </div>
+        <div id="report_div" class="w-full h-[450px] overflow-y-auto border-b-4 pb-4 border-black hide-scrollbar">
+
+        </div>
+        <div class="w-full flex items-center py-4 font-semibold text-sm">
+            <p class="w-[22%]">Total</p>
+            <p id="items_sold" class="w-[13%] text-right"></p>
+            <p id="total_cost" class="w-[13%] text-right"></p>
+            <p id="total_retail" class="w-[13%] text-right"></p>
+            <p id="total" class="w-[13%] text-right"></p>
+            <p id="net_sales" class="w-[13%] text-right"></p>
+            <p id="gross_profit" class="w-[13%] text-right"></p>
+        </div>
+    </div>
     <div class="w-full flex items-center h-[7%] bg-main px-10">
         <p class="text-lg font-medium text-white">Sales summary</p>
     </div>
@@ -80,24 +119,27 @@
             <div class="w-full">
                 <div class="mb-10">
                     <div class="bg-white mb-7 p-6">
-                        <select name="date" id="date" class="outline-none p-2 border mb-6">
-                            <script>
-                                var currentYear = new Date().getFullYear(); // Fetch the current year
-                                var currentMonth = new Date().getMonth(); // Fetch the current month (0-indexed)
-                                var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
-                                    "November", "December"
-                                ];
-                                for (var i = 0; i < months.length; i++) {
-                                    var option = document.createElement("option");
-                                    option.text = months[i] + " " + currentYear; // Add current year to the month
-                                    option.value = months[i] + " " + currentYear; // Add current year to the value
-                                    if (i === currentMonth) {
-                                        option.selected = true; // Automatically select the current month
+                        <div class="w-full flex items-center justify-between">
+                            <select name="date" id="date" class="outline-none p-2 border mb-6">
+                                <script>
+                                    var currentYear = new Date().getFullYear(); // Fetch the current year
+                                    var currentMonth = new Date().getMonth(); // Fetch the current month (0-indexed)
+                                    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                                        "November", "December"
+                                    ];
+                                    for (var i = 0; i < months.length; i++) {
+                                        var option = document.createElement("option");
+                                        option.text = months[i] + " " + currentYear; // Add current year to the month
+                                        option.value = months[i] + " " + currentYear; // Add current year to the value
+                                        if (i === currentMonth) {
+                                            option.selected = true; // Automatically select the current month
+                                        }
+                                        document.getElementById("date").add(option);
                                     }
-                                    document.getElementById("date").add(option);
-                                }
-                            </script>
-                        </select>
+                                </script>
+                            </select>
+                            <button id="print_report" class="px-6 py-2 rounded-md text-white bg-[#414040]">Print Report</button>
+                        </div>
                         <div class="w-full flex justify-between gap-4">
                             <div class="w-[70%] relative h-[500px]">
                                 <canvas id="myChart" class="w-full"></canvas>
@@ -109,13 +151,16 @@
                                     <p class="w-1/2">Sale #</p>
                                     <p class="w-1/2 text-right">Total</p>
                                 </div>
-                                <div id="date_result" class="h-[440px] overflow-y-auto">
+                                <div id="date_result" class="h-[400px] overflow-y-auto">
                                     @foreach ($salesToday as $s)
                                         <div class="w-full flex gap-2 py-2 border-b-2 px-2 text-sm">
                                             <p class="w-1/2">{{ $s->id }}</p>
                                             <p class="w-1/2 text-right">₱{{ $s->total }}.00</p>
                                         </div>
                                     @endforeach
+                                </div>
+                                <div>
+                                    <p>Net sales: <span id="net_sales" class="font-medium">₱{{$netSalesToday}}</span></p>
                                 </div>
                             </div>
                         </div>
@@ -271,16 +316,21 @@
                                         $('#sales_today').html(
                                             `Sales on (${response.datePicked})`)
                                         var data = '';
+                                        var totalSales = 0; // Initialize total sales variable
                                         response.sales.forEach(function(sale) {
+                                            totalSales += sale.total; // Sum the sale totals
                                             data += `
                                                 <div class="w-full flex gap-2 py-2 border-b-2 px-2 text-sm ">
                                                     <p class="w-1/2">${sale.id}</p>
                                                     <p class="w-1/2 text-right">₱${sale.total}.00</p>
                                                 </div>
                                             `;
+
+                                            
                                         });
 
                                         $('#date_result').html(data);
+                                        $('#net_sales').text(`₱${totalSales}.00`);
                                     },
                                     error: function(xhr, status, error) {
                                         // Handle the error
@@ -353,6 +403,90 @@
                     }
                 });
             });
+
+            $('#print_report').on('click', function() {
+                // Remove the 'hidden' class from the #report element
+                $('#coverup').removeClass('hidden')
+                $('#report').removeClass('hidden');
+
+                // Make the AJAX call to fetch the report data
+                $.ajax({
+                    url: "{{ route('office.print_report') }}", // Adjust the URL as needed
+                    method: 'GET', // or 'POST' based on your implementation
+                    success: function(data) {
+                        // Clear previous content (if necessary)
+                        $('#report_div').empty();
+
+                        // Initialize totals
+                        let totalItemsSold = 0;
+                        let totalCost = 0;
+                        let totalRetail = 0;
+                        let totalSales = 0;
+                        let totalNetSales = 0;
+                        let totalGrossProfit = 0;
+
+                        // Iterate through each date's report data
+                        data.forEach(function(report) {
+                            // Format the date as "Sep 10, 2024"
+                            const formattedDate = new Date(report.date).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric' 
+                            });
+
+                            // Calculate the total occurrences
+                            const totalOccurrences = report.food_details.reduce((sum, food) => sum + food.occurrences, 0);
+
+                            // Calculate net sales
+                            const netSales = report.total; // Use the total sales for that day
+                            
+                            // Calculate gross profit
+                            const grossProfit = totalOccurrences > 0 ? netSales - report.total_cost : 0;
+
+                            // Update total calculations
+                            totalItemsSold += totalOccurrences;
+                            totalCost += report.total_cost;
+                            totalRetail += report.total_retail;
+                            totalSales += netSales;
+                            totalNetSales += netSales;
+                            totalGrossProfit += grossProfit;
+
+                            // Create the HTML for this report entry
+                            const reportHtml = `
+                                <div class="w-full flex items-center py-2 text-sm">
+                                    <p class="w-[22%]">${formattedDate}</p>
+                                    <p class="w-[13%] text-right">${totalOccurrences}</p>
+                                    <p class="w-[13%] text-right">${report.total_cost.toFixed(2)}</p>
+                                    <p class="w-[13%] text-right">${report.total_retail.toFixed(2)}</p>
+                                    <p class="w-[13%] text-right">${report.total.toFixed(2)}</p>
+                                    <p class="w-[13%] text-right">${netSales.toFixed(2)}</p>
+                                    <p class="w-[13%] text-right">${grossProfit.toFixed(2)}</p>
+                                </div>
+                            `;
+
+                            // Append the report entry to the report container
+                            $('#report_div').append(reportHtml);
+                        });
+
+                        // Update the totals in the designated HTML elements
+                        $('#items_sold').text(totalItemsSold);
+                        $('#total_cost').text(totalCost.toFixed(2));
+                        $('#total_retail').text(totalRetail.toFixed(2));
+                        $('#total').text(totalSales.toFixed(2));
+                        $('#net_sales').text(totalNetSales.toFixed(2));
+                        $('#gross_profit').text(totalGrossProfit.toFixed(2));
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching report:', textStatus, errorThrown);
+                        // Handle error case (e.g., show an error message to the user)
+                    }
+                });
+            });
+
+            $('#close_report').on('click', function(){
+                $('#coverup').addClass('hidden')
+                $('#report').addClass('hidden');
+            })
         });
 
         function openInventoryOptions() {
