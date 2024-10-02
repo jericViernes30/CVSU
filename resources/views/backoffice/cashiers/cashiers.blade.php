@@ -28,7 +28,7 @@
         </div>
     </div>
     <div id="head" class="w-full flex items-center h-[7%] bg-[#db121c] px-10">
-        <p class="text-lg text-white">Items List</p>
+        <p class="text-lg text-white">Cashiers List</p>
     </div>
     <div id="body" class="w-full h-[93%] flex z-0">
         <div class="w-[5%] pt-10 bg-[#fefefe]">
