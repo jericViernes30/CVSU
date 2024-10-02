@@ -521,7 +521,7 @@ class OfficeController extends Controller
     {
         $stocks = Stocks::all();
         $barcode = $request->input('barcode');
-        $item = Stocks::where('barcode', $barcode)->first();
+        $item = Stocks::where('item', $request->input('item_name'))->first();
         $cost = $request->input('cost');
         $retail = $request->input('retail');
         if ($item) {

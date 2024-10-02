@@ -95,7 +95,7 @@ Route::middleware([IsAdminLoggedIn::class])->group(function(){
 
     Route::get('dummy', [OfficeController::class, 'addMultiple'])->name('dummy');
     Route::get('/generate-pdf/{month}', [OfficeController::class, 'generatePDF']);
-
+    Route::get('/back-office/decline-account/{id}', [OfficeController::class, 'removeCashier'])->name('office.decline_account');
 });
 
 
