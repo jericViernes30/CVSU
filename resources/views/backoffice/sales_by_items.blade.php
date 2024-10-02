@@ -77,7 +77,7 @@
                 <div class="mb-10">
                     <div class="w-full bg-white p-6 flex gap-2">
                         <div class="w-1/2 border-r-2 pr-2">
-                            <p id="item" class="mb-5 font-semibold">Top 10 most sold items for the month of <span id="month">July</span></p>
+                            <p id="item" class="mb-5 font-semibold">Top 10 most sold items for the month of <span id="month">{{$monthNow}}</span></p>
                             <div class="w-full flex flex-col gap-2 items-start">
                               @foreach ($topItems as $topItem)
                                   <button id="items"  data-val="{{$topItem->food_name}}" class="w-full py-1 text-start border-b">{{$topItem->food_name}}</button>
@@ -86,7 +86,7 @@
                         </div>
                         <div class="w-1/2 px-5">
                             {{-- <canvas id="myChart" class="w-full"></canvas> --}}
-                            <p id="item" class="mb-5 font-semibold">Top 10 least sold items for the month of <span id="month">July</span></p>
+                            <p id="item" class="mb-5 font-semibold">Top 10 least sold items for the month of <span id="month">{{$monthNow}}</span></p>
                             <div class="w-full flex flex-col gap-2 items-start">
                               @foreach ($leastItems as $leastItem)
                                   <button id="items"  data-val="{{$leastItem->food_name}}" class="w-full py-1 text-start border-b">{{$leastItem->food_name}}</button>
@@ -180,7 +180,6 @@
               // Do something with the buttonValue, for example, log it to the console
               var url = "{{ route('office.item_name', ['item_name' => ':item_name']) }}";
               url = url.replace(':item_name', buttonValue);
-              alert(url); // This is just for testing purposes
               
               // AJAX request
               $.ajax({
