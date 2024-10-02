@@ -82,10 +82,7 @@
                             </div>
                             <div class="w-1/3">
                                 <label for="" class="text-gray-500">Select Category</label>
-                                <select name="category" id="" class="w-full mt-1 px-2 py-1 outline-none border-b-2 bg-slate-50 border-[#eaeaea] focus:border-b-2 focus:border-main">
-                                    <option value="dry_goods">Dry Goods</option>
-                                    <option value="wet_goods">Wet Goods</option>
-                                </select>
+                                <input type="text" name="category" id="" class="w-full mt-1 px-2 py-1 outline-none border-b-2 bg-slate-50 border-[#eaeaea] focus:border-b-2 focus:border-main"></input>
                             </div>
                         </div>
                         <div class="w-full mb-10">
