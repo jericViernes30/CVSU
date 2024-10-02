@@ -363,27 +363,29 @@ class OfficeController extends Controller
     public function filterItems(Request $request)
 {
     try {
-        $query = Stocks::query();
+        $query = Stocks::query()
+            ->leftJoin('supplier_orders', 'stocks.item', '=', 'supplier_orders.item')
+            ->select('stocks.*', 'supplier_orders.expiration_date');
 
         // Apply filters only if they are present
         if ($request->filled('color')) {
-            $query->where('color', $request->color);
+            $query->where('stocks.color', $request->color); // Specify the table name
         }
 
         if ($request->filled('size')) {
             $size = $request->size;
             switch ($size) {
                 case 'less_200':
-                    $query->where('size', '<', 200);
+                    $query->where('stocks.size', '<', 200); // Specify the table name
                     break;
                 case '200_400':
-                    $query->whereBetween('size', [200, 400]);
+                    $query->whereBetween('stocks.size', [200, 400]); // Specify the table name
                     break;
                 case '400_1000':
-                    $query->whereBetween('size', [400, 1000]);
+                    $query->whereBetween('stocks.size', [400, 1000]); // Specify the table name
                     break;
                 case '1000_2000':
-                    $query->whereBetween('size', [1, 2]);
+                    $query->whereBetween('stocks.size', [1000, 2000]); // Fixed the range
                     break;
             }
         }
@@ -392,25 +394,21 @@ class OfficeController extends Controller
             $quantity = $request->quantity;
             switch ($quantity) {
                 case 'less_50':
-                    $query->where('quantity', '<', 50);
+                    $query->where('stocks.quantity', '<', 50); // Specify the table name
                     break;
                 case 'less_100':
-                    $query->where('quantity', '<', 100);
+                    $query->where('stocks.quantity', '<', 100); // Specify the table name
                     break;
             }
         }
 
         if ($request->filled('category')) {
-            $query->where('category', $request->category);
+            $query->where('stocks.category', $request->category); // Specify the table name
         }
 
         if ($request->filled('price_from') && $request->filled('price_to')) {
-            $query->whereBetween('retail', [$request->price_from, $request->price_to]);
+            $query->whereBetween('stocks.retail', [$request->price_from, $request->price_to]); // Specify the table name
         }
-
-        // Join with the SupplierOrder model to access the expiration_date
-        $query->leftJoin('supplier_orders', 'stocks.item', '=', 'supplier_orders.item')
-              ->select('stocks.*', 'supplier_orders.expiration_date');
 
         if ($request->filled('expiration_date')) {
             $expirationFilter = $request->expiration_date;
@@ -449,6 +447,7 @@ class OfficeController extends Controller
         return response()->json(['error' => 'Internal Server Error'], 500);
     }
 }
+
 
 
 
@@ -557,46 +556,55 @@ class OfficeController extends Controller
         return redirect()->route('office.stocks_adjustment')->with('item', $stocks);
     }
 
-    public function salesByItem()
-    {
-        $topItems = Ticket::select('food_name', DB::raw('COUNT(*) AS occurrence'))
-            ->whereMonth('created_at', '=', 7) // Filter for June
-            ->groupBy('food_name')
-            ->orderByDesc('occurrence')
-            ->limit(10)
-            ->get();
+public function salesByItem()
+{
+    // Get the current month as a Carbon instance
+    $currentDate = Carbon::now();
 
-        $leastItems = Ticket::select('food_name', DB::raw('COUNT(*) AS occurrence'))
-            ->whereMonth('created_at', '=', 7) // Filter for June
-            ->groupBy('food_name')
-            ->orderBy('occurrence', 'asc')
-            ->limit(10)
-            ->get();
+    // Query for top items
+    $topItems = Ticket::select('food_name', DB::raw('COUNT(*) AS occurrence'))
+        ->whereMonth('created_at', '=', $currentDate->month) // Use the current month
+        ->groupBy('food_name')
+        ->orderByDesc('occurrence')
+        ->limit(10)
+        ->get();
 
-        $result = DB::table('orders')
-            ->select('orders.food_name', DB::raw('COUNT(orders.food_name) as occurrence'), 'stocks.cost', 'stocks.retail')
-            ->join('stocks', 'orders.food_name', '=', 'stocks.item')
-            ->groupBy('orders.food_name', 'stocks.cost', 'stocks.retail')
-            ->paginate(10);
+    // Query for least items
+    $leastItems = Ticket::select('food_name', DB::raw('COUNT(*) AS occurrence'))
+        ->whereMonth('created_at', '=', $currentDate->month) // Use the current month
+        ->groupBy('food_name')
+        ->orderBy('occurrence', 'asc')
+        ->limit(10)
+        ->get();
 
-        // dd($result);
+    // Query for items from orders with stock details
+    $result = DB::table('orders')
+        ->select('orders.food_name', DB::raw('COUNT(orders.food_name) as occurrence'), 'stocks.cost', 'stocks.retail')
+        ->join('stocks', 'orders.food_name', '=', 'stocks.item')
+        ->groupBy('orders.food_name', 'stocks.cost', 'stocks.retail')
+        ->paginate(10);
 
-        // Get distinct food names and their associated tickets
-        $distinctNames = Ticket::distinct()->pluck('food_name');
-        $ticketsByFoodName = [];
+    // Get distinct food names and their associated tickets
+    $distinctNames = Ticket::distinct()->pluck('food_name');
+    $ticketsByFoodName = [];
 
-        foreach ($distinctNames as $name) {
-            $ticketsForName = Ticket::where('food_name', $name)->get();
-            $ticketsByFoodName[$name] = $ticketsForName;
-        }
-
-        return view('backoffice/sales_by_items', [
-            'topItems' => $topItems,
-            'leastItems' => $leastItems,
-            'items' => $result,
-            'ticketsByFoodName' => $ticketsByFoodName,
-        ]);
+    foreach ($distinctNames as $name) {
+        $ticketsForName = Ticket::where('food_name', $name)->get();
+        $ticketsByFoodName[$name] = $ticketsForName;
     }
+
+    // Format the month for display, e.g., 'Oct' for October
+    $monthNow = $currentDate->format('M');
+
+    return view('backoffice/sales_by_items', [
+        'topItems' => $topItems,
+        'leastItems' => $leastItems,
+        'items' => $result,
+        'ticketsByFoodName' => $ticketsByFoodName,
+        'monthNow' => $monthNow, // Pass the formatted month to the view
+    ]);
+}
+
 
     public function salesHistory()
     {
