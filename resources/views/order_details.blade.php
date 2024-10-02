@@ -317,7 +317,7 @@
                                         } else {
                                             console.log("The entered cash is greater than or equal to the total.");
                                             submit.disabled = false;
-                                            submit.classList.remove('bg-gray-500 cursor-not-allowed');
+                                            submit.classList.remove('bg-gray-500', 'cursor-not-allowed');
                                             submit.classList.add('bg-main');
                                         }
                                     });
@@ -465,7 +465,7 @@
         } else {
             console.log("The entered cash is greater than or equal to the total.");
             submit.disabled = false;
-            submit.classList.remove('bg-gray-500');
+            submit.classList.remove('bg-gray-500', 'cursor-not-allowed');
             submit.classList.add('bg-main');
         }
     }
