@@ -130,24 +130,6 @@
             </div>
         </div>
         <div class="w-[95%] bg-[#f2f2f2] z-0 p-7">
-            <div class="w-full bg-slate-50 shadow-md py-10 flex justify-evenly mb-10">
-                <div class="w-1/4 flex flex-col items-center">
-                    <p class="text-gray-700 text-md">Total Item Cost</p>
-                    <p class="text-4xl">&#8369;{{$total_cost}}.00</p>
-                </div>
-                <div class="w-1/4 flex flex-col items-center">
-                    <p class="text-gray-700 text-md">Total Retail Value</p>
-                    <p class="text-4xl">&#8369;{{$total_retail}}.00</p>
-                </div>
-                <div class="w-1/4 flex flex-col items-center">
-                    <p class="text-gray-700 text-md">Potential Profit</p>
-                    <p class="text-4xl">&#8369;{{$profit}}.00</p>
-                </div>
-                <div class="w-1/4 flex flex-col items-center">
-                    <p class="text-gray-700 text-md justify-start">Margin</p>
-                    <p class="text-4xl">{{$margin}}%</p>
-                </div>
-            </div>
             <div class="w-full flex gap-4 px-5 mb-7">
                 <input id="item_search" class="w-1/4 border-2 rounded-lg outline-none px-6 py-2" type="search" name="key" placeholder="Search for item name">
                 <button onclick="openFilter()" class="px-10 py-2 rounded-lg text-center bg-main text-white font-medium uppercase text-xs">Advance filter</button>
