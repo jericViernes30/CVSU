@@ -58,7 +58,7 @@
           Login
         </button>
       </form>
-      <a href="{{route('office.login')}}" class="block mx-auto mt-2 underline text-main" target="__blank">Login as Admin</a>
+      <a href="{{route('office.login')}}" class="block mx-auto mt-2 underline text-main" target="_blank">Login as Admin</a>
     </div>
   </div>
   <script>
