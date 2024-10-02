@@ -88,12 +88,6 @@
                         </div>
                         <div class="w-[28%] py-8 rounded-lg shadow-lg bg-[#e5e5e5] border">
                             <div class="flex flex-col gap-5">
-                                <p class="text-center text-5xl font-bold">&#8369;{{$shift->cash_in ?? 0}}</p>
-                                <p class="text-center text-lg">Total Pay Ins</p>
-                            </div>
-                        </div>
-                        <div class="w-[28%] py-8 rounded-lg shadow-lg bg-[#e5e5e5] border">
-                            <div class="flex flex-col gap-5">
                                 <p class="text-center text-5xl font-bold">&#8369;{{$cashInPayments - $cashOutPayments ?? 0}}</p>
                                 <p class="text-center text-lg">GCash Payments</p>
                             </div>
@@ -104,18 +98,6 @@
                             <div class="flex flex-col gap-5">
                                 <p class="text-center text-5xl font-bold">&#8369;{{$cash ?? 0}}</p>
                                 <p class="text-center text-lg">Cash Payments</p>
-                            </div>
-                        </div>
-                        <div class="w-[28%] rounded-lg shadow-lg py-8 bg-[#e5e5e5] border">
-                            <div class="flex flex-col gap-5">
-                                <p class="text-center text-5xl font-bold">&#8369;{{$shift->cash_out ?? 0}}</p>
-                                <p class="text-center text-lg">Total Petty Cash</p>
-                            </div>
-                        </div>
-                        <div class="w-[28%] rounded-lg shadow-lg py-8 bg-[#e5e5e5] border">
-                            <div class="flex flex-col gap-5">
-                                <p class="text-center text-5xl font-bold">&#8369;{{$cashOutCharge + $cashInCharge ?? 0}}</p>
-                                <p class="text-center text-lg">GCash Charges</p>
                             </div>
                         </div>
                     </div>

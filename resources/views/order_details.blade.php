@@ -213,7 +213,7 @@
                                 <button type="button" id="close_tn" class="text-white font-bold">x</button>
                             </div>
                             <div class="p-4 mb-3">
-                                <input id="tn" type="text" autocomplete="off" name="transaction_number" class="text-center outline-none w-full rounded-lg py-6 text-5xl font-bold uppercase bg-blue-500 text-white">
+                                <input id="tn" type="number" autocomplete="off" name="transaction_number" class="text-center outline-none w-full rounded-lg py-6 text-5xl font-bold uppercase bg-blue-500 text-white">
                                 <p class="text-lg text-center">Transaction Number</p>
                             </div>
                             <hr>

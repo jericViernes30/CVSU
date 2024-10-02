@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   @vite('resources/css/app.css')
   <link rel="shortcut icon" href="{{asset('images/favicon.png')}}" type="image/x-icon">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <title>Cashier Login</title>
 </head>
 <body class="relative h-screen bg-[#7e817f]">

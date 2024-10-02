@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OfficeController extends Controller
 {
@@ -470,7 +471,7 @@ class OfficeController extends Controller
     public function addItem(Request $request)
     {
         // dd($request);
-        $quantity = 0;
+        $quantity = 1;
         $stocks = Stocks::all();
         $profit = 0;
         $cost = $request->input('cost');
@@ -1191,10 +1192,12 @@ class OfficeController extends Controller
         ])->with('success', 'Items successfully deleted.');
     }
 
-    public function printReport()
+    public function printReport($month)
     {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        $month = (int) $month;
+        $dateToday = Carbon::today();
+        $startOfMonth = Carbon::createFromDate(null, $month, 1)->startOfMonth(); // First day of the provided month
+        $endOfMonth = Carbon::createFromDate(null, $month, 1)->endOfMonth(); // Last day of the provided month   
         
         $dates = [];
         
@@ -1263,9 +1266,103 @@ class OfficeController extends Controller
                 'food_details' => $foodDetails, // Add food details (cost and retail)
                 'total_cost' => $totalCost, // Total cost for the day
                 'total_retail' => $totalRetail, // Total retail for the day
+                'monthStart' => $startOfMonth->format('M d, Y'),
+                'monthEnd' => $endOfMonth->format('M d, Y'),
+                'dateToday' => $dateToday->format('M d, Y'),
             ];
         }
 
         return response()->json($dates); // Return the data as JSON or use as needed
+    }
+
+    public function generatePDF($month)
+    {
+        // Ensure the month is provided in numeric format (1-12)
+        $month = (int) $month;
+        $dateToday = Carbon::today();
+        $startOfMonth = Carbon::createFromDate(null, $month, 1)->startOfMonth(); // First day of the provided month
+        $endOfMonth = Carbon::createFromDate(null, $month, 1)->endOfMonth(); // Last day of the provided month    
+
+        $dates = [];
+        
+        // Iterate through each day of the month
+        for ($date = $startOfMonth; $date->lte($endOfMonth); $date->addDay()) {
+            $formattedDate = $date->format('Y-m-d');
+            
+            // Calculate the sum of the 'total' column for the specific day
+            $totalSales = History::whereDate('created_at', $formattedDate)->sum('total');
+            
+            // Get all unique ticket numbers for the specific day
+            $tickets = History::whereDate('created_at', $formattedDate)
+                ->pluck('ticket')
+                ->unique()
+                ->toArray();
+            
+            // Initialize an array to hold food names and their costs/retail values
+            $foodDetails = [];
+            $totalCost = 0;
+            $totalRetail = 0;
+
+            // Use ticket numbers to get food names from the Ticket model
+            if (!empty($tickets)) {
+                // Retrieve food names along with their counts
+                $foodCounts = Ticket::whereIn('ticket', $tickets)
+                    ->select('food_name', DB::raw('count(*) as count')) // Use DB facade
+                    ->groupBy('food_name')
+                    ->get();
+
+                foreach ($foodCounts as $foodCount) {
+                    $foodName = $foodCount->food_name;
+                    $count = $foodCount->count;
+
+                    $stockItem = Stocks::where('item', $foodName)->first(['cost', 'retail']);
+                    if ($stockItem) {
+                        // Multiply cost and retail by the occurrence count
+                        $costTotal = $stockItem->cost * $count;
+                        $retailTotal = $stockItem->retail * $count;
+
+                        $foodDetails[] = [
+                            'food_name' => $foodName,
+                            'cost' => $costTotal, // Total cost for this item
+                            'retail' => $retailTotal, // Total retail for this item
+                            'occurrences' => $count, // Add the occurrence count
+                        ];
+                        // Add to overall total cost and retail
+                        $totalCost += $costTotal;
+                        $totalRetail += $retailTotal;
+                    } else {
+                        // If not found, you can set cost and retail to null or any default value
+                        $foodDetails[] = [
+                            'food_name' => $foodName,
+                            'cost' => null,
+                            'retail' => null,
+                            'occurrences' => $count, // Add the occurrence count
+                        ];
+                    }
+                }
+            }
+
+            // Add the date, total sales, tickets, food details, and totals to the array
+            $dates[] = [
+                'date' => $formattedDate,
+                'total' => $totalSales > 0 ? $totalSales : 0, // Set to 0 if there are no sales
+                'tickets' => $tickets, // Use 'tickets' instead of 'ticket_numbers'
+                'food_details' => $foodDetails, // Add food details (cost and retail)
+                'total_cost' => $totalCost, // Total cost for the day
+                'total_retail' => $totalRetail, // Total retail for the day
+                'monthStart' => $startOfMonth->format('M d, Y'),
+                'monthEnd' => $endOfMonth->format('M d, Y'),
+                'dateToday' => $dateToday->format('M d, Y'),
+                'reportMonth' => $startOfMonth->format('M Y'),
+            ];
+        }
+
+        // Load a view and pass the data to it
+        $pdf = Pdf::loadView('pdf', ['dates' => $dates]);
+
+        // Return the PDF for download or as a response
+        return $pdf->download('report.pdf');
+        // Alternatively, to display it in the browser:
+        // return $pdf->stream('report.pdf');
     }
 }

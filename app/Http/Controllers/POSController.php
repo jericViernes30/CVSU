@@ -305,7 +305,7 @@ class POSController extends Controller
             'ticket' => $request->input('ticket'),
             'cashier' => $cashier_name,
             'customer' => $request->input('customer'),
-            'type' => 'SALE',
+            'type' => 'Cash',
             'sub_total' => $request->input('sub_total'),
             'tax' => $request->input('tax'),
             'cash' => $request->input('cash') ?? 0,

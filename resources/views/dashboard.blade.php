@@ -116,11 +116,15 @@
                 </div>
                 <div id="foods" class="w-full grid grid-cols-5 gap-4 h-[90%] overflow-y-auto">
                     @foreach ($menus as $menu)
-                       <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="{{$menu->item}}" data-price="{{$menu->retail}}">
+                        <button 
+                            class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black"
+                            data-food-name="{{$menu->item}}" 
+                            data-price="{{$menu->retail}}"
+                        >
                             <p class="">{{$menu->item}} {{$menu->size}}</p>
                             <p class="font-medium mb-2">&#8369; {{$menu->retail}}.00</p>
-                            <p class="text-xs text-[#a3a3a3]">{{$menu->quantity}} in stock</p>
-                       </button>
+                            <p class="text-xs text-[#a3a3a3]"><span class="stockCount">{{$menu->quantity}}</span> in stock</p>
+                        </button>
                     @endforeach
                 </div>
             </div>
@@ -209,7 +213,7 @@
             const backgroundElement = document.getElementById("background");
             
 
-            $("#search_item").on('keyup', function(){
+            $("#search_item").on('keyup', function() {
     var key = $(this).val();
     var url = "{{ route('livesearch', ['key' => ':key']) }}";
     url = url.replace(':key', key);
@@ -217,7 +221,7 @@
     $.ajax({
         url: url,
         method: 'GET',
-        success: function(response){
+        success: function(response) {
             var foodsDiv = $('#foods');
             foodsDiv.empty(); // Clear the current contents
 
@@ -230,27 +234,36 @@
 
             if (response.menus.length > 0) {
                 response.menus.forEach(function(menu) {
+                    var stockCount = menu.quantity; // Store the stock count
+
                     var menuButton = `
                     <button class="menu-button flex flex-col rounded-md shadow-lg bg-[#fefefe] p-4 items-center justify-center text-sm hover:bg-[#f5a7a4] hover:text-black" data-food-name="${menu.item}" data-price="${menu.retail}">
                         <p class="">${menu.item} ${menu.size}</p>
                         <p class="font-medium">&#8369; ${menu.retail}.00</p>
-                        <p class="text-xs text-[#a3a3a3]">${menu.quantity} in stock</p>
+                        <p class="text-xs text-[#a3a3a3]"><span class="stockCount">${menu.quantity}</span> in stock</p>
                     </button>
                     `;
                     foodsDiv.append(menuButton);
+
+                    // Check if the stock count is less than 1 and disable the button
+                    if (stockCount < 1) {
+                        // Disable the button and change its styles
+                        var button = foodsDiv.children().last(); // Get the last added button
+                        button.attr('disabled', true)
+                            .removeClass('hover:bg-[#f5a7a4] hover:text-black')
+                            .addClass('bg-gray-200 cursor-not-allowed');
+                    }
                 });
             } else {
                 // Optionally handle the case where no items match the search
                 foodsDiv.append('<p class="text-center text-gray-500">No items found</p>');
             }
         },
-        error: function(xhr, status, error){
+        error: function(xhr, status, error) {
             console.error(xhr, status, error);
         }
     });
 });
-
-
     
             // Function to keep the input field focused
             function keepFocus() {
@@ -455,6 +468,16 @@
                     keepFocus(); // Ensure the input field stays focused
                 } else {
                     console.log('Invalid item data:', foodName, price);
+                }
+            });
+
+            $('.menu-button').each(function() {
+                var stockCount = parseInt($(this).find('.stockCount').text());
+                
+                if (stockCount < 1) {
+                    $(this).attr('disabled', true) // Disable the button
+                        .removeClass('hover:bg-[#f5a7a4] hover:text-black') // Remove hover effects
+                        .addClass('bg-gray-200 cursor-not-allowed'); // Add gray background and disabled cursor
                 }
             });
     

@@ -91,9 +91,11 @@ Route::middleware([IsAdminLoggedIn::class])->group(function(){
     Route::get('/back-office/default-stock-order', [OfficeController::class, 'defaultStockOrder'])->name('office.default_stock_order');
     Route::get('back-office/expiration-date', [OfficeController::class, 'expirationDate'])->name('office.expiration_date');
     Route::get('/back-office/item-search-v2/{key}', [OfficeController::class, 'itemSearchV2'])->name('office.item_search_v2');
-    Route::get('/back-office/print-report', [OfficeController::class, 'printReport'])->name('office.print_report');
+    Route::get('/back-office/print-report/{month}', [OfficeController::class, 'printReport'])->name('office.print_report');
 
     Route::get('dummy', [OfficeController::class, 'addMultiple'])->name('dummy');
+    Route::get('/generate-pdf/{month}', [OfficeController::class, 'generatePDF']);
+
 });
 
 
