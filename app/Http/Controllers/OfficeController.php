@@ -1373,4 +1373,24 @@ public function salesByItem()
         // Alternatively, to display it in the browser:
         // return $pdf->stream('report.pdf');
     }
+
+    public function removeCashier($id)
+    {
+        try {
+            // Find the account by ID
+            $pendingAccount = PendingAccount::findOrFail($id);
+
+            // Delete the account
+            $pendingAccount->delete();
+
+            return response()->json(['message' => 'Account removed successfully.'], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'Account not found.'], 404);
+        } catch (\Exception $e) {
+            // Log the error message for debugging purposes
+            Log::error('Error removing cashier: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
 }
