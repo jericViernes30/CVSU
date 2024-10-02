@@ -114,7 +114,7 @@
                                     $date = $cashier->created_at->format('F j, Y - g:i A');
                                 }}
                             </p>
-                            <a href="/back-office/remove-cashier/{{$cashier->id}}" class="w-[15%] text-main">Remove</a>
+                            <a href="/back-office/decline-account/{{$cashier->id}}" class="w-[15%] text-main">Remove</a>
                         </div>
                     @endforeach
                 </div>
