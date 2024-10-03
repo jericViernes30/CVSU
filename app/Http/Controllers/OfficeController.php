@@ -517,7 +517,7 @@ class OfficeController extends Controller
         return view('backoffice/items/item_details', ['item' => $item, 'suppliers' => $suppliers]);
     }
 
-    public function updateItem(Request $request)
+    public function updateItem(Request $request) 
     {
         $stocks = Stocks::all();
         $barcode = $request->input('barcode');
@@ -1383,7 +1383,7 @@ public function salesByItem()
             // Delete the account
             $pendingAccount->delete();
 
-            return response()->json(['message' => 'Account removed successfully.'], 200);
+            return redirect()->back();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['error' => 'Account not found.'], 404);
         } catch (\Exception $e) {
